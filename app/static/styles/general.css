@@ -1,0 +1,55 @@
+@import "./bootstrap/bootstrap-reboot.min.css";
+@import "./bootstrap/bootstrap-grid.min.css";
+
+@import "../fonts/fonts.css";
+
+html {
+    scroll-behavior: smooth;
+}
+
+.navbar {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: gives a subtle shadow for depth */
+    position: relative;  /* Added to position nav-links */
+}
+
+.navbar .brand { /*Quake text*/
+    color: black;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: 'Dancing Script', cursive;
+}
+
+.navbar .nav-links {
+    display: flex;
+    gap: 100px; /* Spacing between the links */
+    position: absolute; /* Positioning nav-links */
+    left: 50%;  /* Centering nav-links */
+    transform: translateX(-50%); /* Ensuring true center */
+}
+
+.navbar .nav-links a {
+    color: darkblue;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.navbar .nav-links a:hover {
+    color: navy;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+    display: none;
+}
+  
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+  
