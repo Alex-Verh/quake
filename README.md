@@ -12,6 +12,11 @@ The project "Quake" has been initiated for several compelling reasons:
 
 4. **Protection Against Multiple Threats**: Our goal is to create a versatile system that offers protection against various threats, including gas leakages, fires, and earthquakes. The name "Quake" underscores the project's adaptability, emphasizing its capacity to deliver timely warnings in critical situations.
 
+## Building and Running
+1. Setup a virtual python environment
+2. Install the necessary dependencies via `pip install -r requirements.txt`
+3. Run the flask server via `flask --app app/app.py run`
+
 ## Limitations of the Current System
 
 While "Quake" is a powerful system, it does have certain limitations, including:
