@@ -1,1 +1,33 @@
 @import "general.css";
+
+
+.my-box {
+    background-color: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 20vh;
+}
+
+h1 {
+    margin: 10px 0 0 0;
+}
+
+p {
+    font-size: 30px;
+}
+
+p1 {
+    font-size: 20px;
+    font-weight: bold;
+    color: red;
+}
+
+p2 {
+    font-weight: bold;
+    font-size: 25px;
+}
