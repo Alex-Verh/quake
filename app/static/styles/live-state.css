@@ -1,9 +1,12 @@
 @import "general.css";
 
+body {
+    overflow: hidden;
+}
 
 .my-box {
     background-color: white;
-    border-radius: 8px;
+    border-radius: 20px;
     padding: 16px;
     margin-top: 30px;
     display: flex;
@@ -18,6 +21,8 @@ h1 {
 }
 
 p {
+    margin-top: 10px;
+    font-family: Montserrat;
     font-size: 30px;
 }
 
