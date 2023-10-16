@@ -8,8 +8,11 @@ html {
 }
 
 body {
-      background-color: #001453;
+    background-color: #001453;
+}
 
+.bold {
+    font-weight: 700;
 }
 
 .navbar {
@@ -41,11 +44,10 @@ body {
     }
 }
 
-.navbar .brand { /*Quake text*/
-    color: black;
+.navbar .logo {
     font-size: 24px;
     font-weight: bold;
-    font-family: 'Dancing Script', cursive;
+    font-family: Dancing Script, cursive, Arial;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
