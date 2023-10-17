@@ -2,4 +2,86 @@
 {% block title %} {{ super() }} History {% endblock %}
 {% block css %} <link rel="stylesheet" type="text/css" href="../static/styles/history.css"/> {% endblock %}
 {% block content %}
+<main>
+    <div class="container">
+        <div class="history-parameter">
+            <div class="row  d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/temperature.svg')}}" alt="Temperature">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Temperature History</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-parameter">
+            <div class="row  d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/humidity.svg')}}" alt="Humidity">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Humidity History</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-parameter">
+            <div class="row d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/fire.svg')}}" alt="Fire">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Flame Leaks</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-parameter">
+            <div class="row d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Earthquake Cases</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-parameter">
+            <div class="row d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke.svg')}}" alt="Smoke">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Smoke Leaks</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-parameter">
+            <div class="row d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/gas.svg')}}" alt="Gas">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Gas Leaks</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 {% endblock %}
