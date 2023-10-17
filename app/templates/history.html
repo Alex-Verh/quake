@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %} {{ super() }} History {% endblock %}
-{% block css %} <link rel="stylesheet" type="text/css" href="../static/styles/history.css"/> {% endblock %}
+{% block css %} <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/history.css')}}"/> {% endblock %}
 {% block content %}
 <main>
     <div class="container">
