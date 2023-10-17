@@ -1,15 +1,46 @@
 @import "general.css";
 
+.history-analytics, .history-parameter {
+    background-color: #fff;
+    font-family: Montserrat, sans-serif;
+    border-radius: 20px;
+    padding: 15px 50px;
+}
 
 .history-parameter {
-    background-color: #fff;
-    border-radius: 20px;
-    padding: 10px 50px;
     margin: 50px 0 20px 0;
-    font-family: Montserrat, sans-serif;
+    cursor: pointer;
 
     .history-parameter__title {
         font-weight: 700;
         font-size: 40px;
     }
+}
+
+.history-analytics {
+    padding-right: 150px;
+
+    .history-analytics__event {
+        margin: 15px 0;
+    }
+
+    .history-analytics__time {
+        font-size: 28px;
+    }
+
+    .history-analytics__stat {
+        font-size: 24px;
+    }
+}
+
+.small {
+    color: #0C9600;
+}
+
+.moderate {
+    color: #744C09;
+}
+
+.great {
+    color: #860000;
 }
