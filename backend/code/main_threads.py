@@ -53,6 +53,7 @@ data_lock = threading.Lock()
 
 
 # Function to upload the average of collected datat to the db
+# The function is tooooo big so another function (below) will be representing the thread
 def upload_data_sql():
     # Average values
     avg_humidity = 0
@@ -73,6 +74,8 @@ def upload_data_sql():
 
         # Calculate avg values for the dht sensor
         size_dht = sensor_data["humidity"].qsize()
+        if (size_dht == 0): size_dht = 1
+
         while not sensor_data["humidity"].empty():
             hum, temp = sensor_data["humidity"].get()
             avg_humidity += hum
@@ -82,6 +85,8 @@ def upload_data_sql():
 
         # Calculate avg values for the mpu accelerator
         size_mpu = sensor_data["acceleration"].qsize()
+        if (size_mpu == 0): size_mpu = 1
+
         while not sensor_data["acceleration"].empty():
             delta_x, delta_y, delta_z = sensor_data["acceleration"].get()
             avg_delta_x += delta_x
@@ -94,6 +99,8 @@ def upload_data_sql():
         # Calculate "top" (most common) value for flame
         flame_zero_counter = 0
         size_flame = sensor_data["flame"].qsize()
+        if (size_flame == 0): size_flame = 1
+
         while not sensor_data["flame"].empty():
             val = sensor_data["flame"].get()
             if (val == 0):
@@ -103,10 +110,11 @@ def upload_data_sql():
         else:
             top_flame = 1
 
-
         # Calculate the "top" (most common) value for mq2
         mq2_zero_counter = 0
         size_mq2 = sensor_data["mq2"].qsize()
+        if (size_mq2 == 0): size_mq2 = 1
+
         while not sensor_data["mq2"].empty():
             val = sensor_data["mq2"].get()
             if (val == 0):
@@ -115,11 +123,12 @@ def upload_data_sql():
             top_mq2 = 0
         else:
             top_mq2 = 1
-
         
         # Calculate the "top" (most common) value for mq9
         mq9_zero_counter = 0
         size_mq9 = sensor_data["mq9"].qsize()
+        if (size_mq9 == 0): size_mq9 = 1
+        
         while not sensor_data["mq9"].empty():
             val = sensor_data["mq9"].get()
             if (val == 0):
@@ -169,6 +178,13 @@ def upload_data_sql():
         if connection:
             connection.close()
             print("The sqlite connection is closed")
+
+
+# Function to create the upload_data_sql_thread
+def upload_data_sql_thread(interval):
+    while True:
+        time.sleep(interval)
+        upload_data_sql()
 
 
 # Function to read AM2302 data
@@ -275,12 +291,14 @@ if __name__ == '__main__':
         flame_thread = threading.Thread(target=read_flame_data, name="flame_thread", args=(1,))
         mq2_thread = threading.Thread(target=read_mq2_data, name="mq2_thread", args=(1,))
         mq9_thread = threading.Thread(target=read_mq9_data, name="mq9_thread", args=(1,))
+        sql_thread = threading.Thread(target=upload_data_sql_thread, name="sql_thread", args=(300,))
 
         dht_thread.start()
         acceleration_thread.start()
         flame_thread.start()
         mq2_thread.start()
         mq9_thread.start()
+        sql_thread.start()
 
 
         while True:
