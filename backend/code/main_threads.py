@@ -2,6 +2,8 @@
 import dht      # humidity sensor
 import accel
 import dd_sensor
+import buzzer
+import led
 
 import time
 import datetime
@@ -14,12 +16,23 @@ DHT_PIN = 4
 FLAME_PIN = 26
 MQ2_PIN = 4
 MQ9_PIN = 4
+COLLECT_DATA_INTERVAL = 0.5
+UPLOAD_SQL_INTERVAL = 300
 
 # Output constants
 BUZZER_PIN = 24
+BUZZER_DURATION = 2
+# red and green leds are switched
+LED_RED = 27    # 22
+LED_GREEN = 22  # 27
+LED_BLUE = 17
+LED_ITERATIONS = 3
 
 # Data constants
 DATA_QUEUE_SIZE = 300
+HUMIDITY_MIN = 30
+HUMIDITY_MAX = 70
+TEMPERATURE_MAX = 50
 
 # Sensor enable control
 enable_dht = True
@@ -191,6 +204,12 @@ def upload_data_sql_thread(interval):
         upload_data_sql()
 
 
+# Function to trigger the alarm (LED + Buzzer)
+def trigger_alarm():
+    print("Alarm triggered")
+    led.loop_led(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS)
+    buzzer.control_buzzer(BUZZER_PIN, True, BUZZER_DURATION)
+
 # Function to read AM2302 data
 def read_dht_data(interval):
     print("Reading dht data...")
@@ -198,9 +217,14 @@ def read_dht_data(interval):
         if enable_dht:
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
+                if (humidity < HUMIDITY_MIN or humidity > HUMIDITY_MAX or temperature > TEMPERATURE_MAX):
+                    print("Dangerous levels of humidity or temperature.")
+                    trigger_alarm()
+
                 with data_lock:
                     sensor_data["humidity"].put((humidity, temperature,))
                     ensure_queue_size()
+
         time.sleep(interval)
 
 
@@ -236,14 +260,14 @@ def read_mpu6050_data(interval):
                 or delta_z > accel.SHARP_MOVEMENT_THRESHOLD
             )
             if sharp_threshold_passed:
-                print("Sharp movement detected. RING ALARM RING ALARM RING ALARM RING ALARM RING ALARM")
+                print("Sharp movement detected.")
+                trigger_alarm()
 
             with data_lock:
                 sensor_data["acceleration"].put((
                         delta_x, 
                         delta_y, 
-                        delta_z, 
-                        sharp_threshold_passed,
+                        delta_z,
                     ))
                 ensure_queue_size()
         time.sleep(interval)
@@ -255,6 +279,10 @@ def read_flame_data(interval):
         if enable_flame:
             flame = dd_sensor.read_dd(FLAME_PIN)
             # print('Flame status (0 - good; 1 - bad): ', flame)
+            if (flame == 1):
+                print("Flame detected.")
+                trigger_alarm()
+
             with data_lock:
                 sensor_data["flame"].put(flame)
                 ensure_queue_size()
@@ -268,6 +296,10 @@ def read_mq2_data(interval):
         if enable_mq2:
             mq2 = dd_sensor.read_dd(MQ2_PIN)
             # print('Gas status (0 - bad; 1 - good): ', mq2)
+            if (mq2 == 0):
+                print("Gas leakage detected.")
+                trigger_alarm()
+            
             with data_lock:
                 sensor_data["mq2"].put(mq2)
                 ensure_queue_size()
@@ -284,18 +316,22 @@ def read_mq9_data(interval):
             with data_lock:
                 sensor_data["mq9"].put(mq9)
                 ensure_queue_size()
+
+            if (mq9 == 0):
+                print("CO leakage detected.")
+                trigger_alarm()
         time.sleep(interval)
 
 
 if __name__ == '__main__':
 
     try:
-        dht_thread = threading.Thread(target=read_dht_data, name="dht_thread", args=(1,))
-        acceleration_thread = threading.Thread(target=read_mpu6050_data, name="acceleration_thread", args=(1,))
-        flame_thread = threading.Thread(target=read_flame_data, name="flame_thread", args=(1,))
-        mq2_thread = threading.Thread(target=read_mq2_data, name="mq2_thread", args=(1,))
-        mq9_thread = threading.Thread(target=read_mq9_data, name="mq9_thread", args=(1,))
-        sql_thread = threading.Thread(target=upload_data_sql_thread, name="sql_thread", args=(300,))
+        dht_thread = threading.Thread(target=read_dht_data, name="dht_thread", args=(COLLECT_DATA_INTERVAL,))
+        acceleration_thread = threading.Thread(target=read_mpu6050_data, name="acceleration_thread", args=(COLLECT_DATA_INTERVAL,))
+        flame_thread = threading.Thread(target=read_flame_data, name="flame_thread", args=(COLLECT_DATA_INTERVAL,))
+        mq2_thread = threading.Thread(target=read_mq2_data, name="mq2_thread", args=(COLLECT_DATA_INTERVAL,))
+        mq9_thread = threading.Thread(target=read_mq9_data, name="mq9_thread", args=(COLLECT_DATA_INTERVAL,))
+        sql_thread = threading.Thread(target=upload_data_sql_thread, name="sql_thread", args=(UPLOAD_SQL_INTERVAL,))
 
         dht_thread.start()
         acceleration_thread.start()
@@ -306,9 +342,9 @@ if __name__ == '__main__':
 
 
         while True:
-            print('----- 5 seconds have passed -----')
-            print(sensor_data)
+            # print(sensor_data)
             time.sleep(5)
+            print('----- 5 seconds have passed -----')
 
     except KeyboardInterrupt:
         dht_thread.join()

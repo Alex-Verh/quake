@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO
 import time
-  
+
+# Function to control the buzzer
+# The interval will be used to turn off the alarm after specified seconds
 def control_buzzer(BUZZER_PIN, status, interval):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUZZER_PIN, GPIO.OUT)
