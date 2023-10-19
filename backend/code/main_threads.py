@@ -129,7 +129,7 @@ def upload_data_sql():
         else:
             top_mq9 = 1
 
-    # Write to db
+    # Insert into quakeDB.db
     try:
         connection = sqlite3.connect("../db/quakeDB.db")
         cursor = connection.cursor()
@@ -160,6 +160,8 @@ def upload_data_sql():
 
         connection.commit()
         connection.close()
+
+        print("Success on inserting into quakeDB.db!")
     
     except sqlite3.Error as err:
         print("Failed to insert data into sqlite table", err)
