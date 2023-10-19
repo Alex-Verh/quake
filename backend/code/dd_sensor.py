@@ -7,4 +7,5 @@ def read_dd(INPUT_PIN):
     GPIO.setup(INPUT_PIN, GPIO.IN)
 
     input = GPIO.input(INPUT_PIN)
-    print('DD signal for GPIO ' , INPUT_PIN, ': ', input)
+    # print('DD signal for GPIO ' , INPUT_PIN, ': ', input)
+    return input

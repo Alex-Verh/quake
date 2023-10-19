@@ -48,19 +48,17 @@ def read_raw_data(addr):
 bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
 Device_Address = 0x68   # MPU6050 device address
 
-MPU_Init()
-
-print (" Reading Data of Gyroscope and Accelerometer")
+# MPU_Init() # moved this into read_raw_acceleration()
 
 
 SHARP_MOVEMENT_THRESHOLD = 5000
 
 def read_raw_acceleration():
+       MPU_Init()
        return read_raw_data(ACCEL_XOUT_H), read_raw_data(ACCEL_YOUT_H), read_raw_data(ACCEL_ZOUT_H)
 
 
 if __name__ == "__main__":
-
         prev_acc_x = 0  # Initialize previous acceleration values
         prev_acc_y = 0
         prev_acc_z = 0

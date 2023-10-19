@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 
-Flame_PIN = 4
+Flame_PIN = 26
 GPIO.setup(Flame_PIN, GPIO.IN)
 
 try: 
