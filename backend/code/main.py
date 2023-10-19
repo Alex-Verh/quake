@@ -12,7 +12,7 @@ MQ2_PIN = 4
 MQ9_PIN = 4
 
 # Sensor enable control
-enable_humidity = True
+enable_dht = True
 enable_accel = False
 enable_flame = True
 enable_mq2 = False
@@ -21,11 +21,11 @@ enable_mq9 = False
 # Sensor data dictionaries for each sensor
 # The first entry in each dictionary is the time() when the data was recorded
 sensor_data = {
-    "humidity": [],         # time (float), humidity (float), temperature (float)
-    "acceleration": [],     # time (float), 
-    "flame": [],            # time (float), delta_x (float), delta_y (float), delta_z (float), threshold_passed (boolean)
-    "mq2": [],
-    "mq9": [],
+    "humidity": [],         # datetime (sql datetime), humidity (float), temperature (float)
+    "acceleration": [],     # datetime (sql datetime), delta_x (float), delta_y (float), delta_z (float), threshold_passed (boolean)
+    "flame": [],            # datetime (sql datetime), digital_signal (0 - good; 1 - bad)
+    "mq2": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
+    "mq9": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
 }
 
 # Accelerometer previous values
@@ -41,8 +41,8 @@ while True:
     
 
     # Read humidity
-    if (enable_humidity):
-        humidity, temperature = dht.read_humidity_temperature(4)
+    if (enable_dht):
+        humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
 
         if humidity is not None and temperature is not None:
             print('Humidity={1:0.1f}%  Temp={0:0.1f}*'.format(humidity, temperature))
