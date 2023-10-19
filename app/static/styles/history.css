@@ -33,6 +33,16 @@
     }
 }
 
+.history-analytics_graph {
+    padding: 0 !important;
+    height: 550px;
+}
+
+.ct-chart {
+    width: 90%;
+    height: 90%;
+}
+
 .small {
     color: #0C9600;
 }
