@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %} {{ super() }} Settings {% endblock %}
 {% block css %} <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/settings.css')}}"/> {% endblock %}
+{% block javascript %} <script type="module" charset="utf-8" src="{{url_for('static', filename='javascript/settings.js')}}"></script> {% endblock %}
 {% block content %}
 <main>
     <div class="container">
@@ -127,6 +128,21 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-4">
+                            Earthquake Alert Limit
+                        </div>
+                        <div class="col-1">
+                            <span class="bold">3.0°</span>
+                        </div>
+                        <div class="col-6 d-flex align-items-center">
+                            <input class="settings-block__slider" type="range" min="0" max="10" value="3" class="slider" id="earthquake">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-block__field">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-4">
                             Humidity Alert Limit
                         </div>
                         <div class="col-1">
@@ -149,21 +165,6 @@
                         </div>
                         <div class="col-6 d-flex align-items-center">
                             <input class="settings-block__slider" type="range" min="0" max="1" value="0" class="slider" id="smoke">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-block__field">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-4">
-                            Earthquake Alert Limit
-                        </div>
-                        <div class="col-1">
-                            <span class="bold">3.0°</span>
-                        </div>
-                        <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="10" value="3" class="slider" id="earthquake">
                         </div>
                     </div>
                 </div>
