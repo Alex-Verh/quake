@@ -6,13 +6,16 @@ import dd_sensor
 import time
 import datetime
 import threading
-import sys
+import queue
+import sqlite3
 
 # Constants
 DHT_PIN = 4
 FLAME_PIN = 26
 MQ2_PIN = 4
 MQ9_PIN = 4
+
+DATA_QUEUE_SIZE = 300
 
 # Sensor enable control
 enable_dht = True
@@ -22,21 +25,149 @@ enable_mq2 = False
 enable_mq9 = False
 
 # Sensor data dictionaries for each sensor
-# The first entry in each dictionary is the time() when the data was recorded
+# Time will be recorded when writing to the db
 sensor_data = {
-    "humidity": [],         # datetime (sql datetime), humidity (float), temperature (float)
-    "acceleration": [],     # datetime (sql datetime), delta_x (float), delta_y (float), delta_z (float), threshold_passed (boolean)
-    "flame": [],            # datetime (sql datetime), digital_signal (0 - good; 1 - bad)
-    "mq2": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
-    "mq9": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
+    "humidity": queue.Queue(),         # humidity (float), temperature (float)
+    "acceleration": queue.Queue(),     # delta_x (float), delta_y (float), delta_z (float)
+    "flame": queue.Queue(),            # digital_signal (0 - good; 1 - bad)
+    "mq2": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
+    "mq9": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
 }
 
+# We will set a maximum queue size of 300
+# Sensors will collect data every second -> 5 minutes * 60 seconds = 300 entries
+# Data average will be uploaded to the db once every 5 minutes
+def ensure_queue_size():
+    for key in sensor_data:
+        while sensor_data[key].qsize() > DATA_QUEUE_SIZE:
+            sensor_data[key].get()
+
+
+# Function to get the current datetime in sql datetime format
 def get_current_sql_time():
     current_time = datetime.datetime.now()
     return current_time.strftime("%Y-%m-%d %H:%M:%S")
 
 # Create a lock object for synchronized access to sensor_data
 data_lock = threading.Lock()
+
+
+# Function to upload the average of collected datat to the db
+def upload_data_sql():
+    # Average values
+    avg_humidity = 0
+    avg_temperature = 0
+    avg_delta_x = 0
+    avg_delta_y = 0
+    avg_delta_z = 0
+
+    # Values that will indicate if the hazard was detected even once in the time interval between db writes
+    # 0 good; 1 bad
+    top_flame = 0
+    # 0 bad; 1 good
+    top_mq2 = 1
+    # 0 bad; 1 good
+    top_mq9 = 1
+
+    with data_lock:
+
+        # Calculate avg values for the dht sensor
+        size_dht = sensor_data["humidity"].qsize()
+        while not sensor_data["humidity"].empty():
+            hum, temp = sensor_data["humidity"].get()
+            avg_humidity += hum
+            avg_temperature += temp
+        avg_humidity /= size_dht
+        avg_temperature /= size_dht
+
+        # Calculate avg values for the mpu accelerator
+        size_mpu = sensor_data["acceleration"].qsize()
+        while not sensor_data["acceleration"].empty():
+            delta_x, delta_y, delta_z = sensor_data["acceleration"].get()
+            avg_delta_x += delta_x
+            avg_delta_y += delta_y
+            avg_delta_z += delta_z
+        avg_delta_x /= size_mpu
+        avg_delta_y /= size_mpu
+        avg_delta_z /= size_mpu
+
+        # Calculate "top" (most common) value for flame
+        flame_zero_counter = 0
+        size_flame = sensor_data["flame"].qsize()
+        while not sensor_data["flame"].empty():
+            val = sensor_data["flame"].get()
+            if (val == 0):
+                flame_zero_counter += 1
+        if (flame_zero_counter / size_flame >= 0.5):
+            top_flame = 0
+        else:
+            top_flame = 1
+
+
+        # Calculate the "top" (most common) value for mq2
+        mq2_zero_counter = 0
+        size_mq2 = sensor_data["mq2"].qsize()
+        while not sensor_data["mq2"].empty():
+            val = sensor_data["mq2"].get()
+            if (val == 0):
+                mq2_zero_counter += 1
+        if (mq2_zero_counter / size_mq2 >= 0.5):
+            top_mq2 = 0
+        else:
+            top_mq2 = 1
+
+        
+        # Calculate the "top" (most common) value for mq9
+        mq9_zero_counter = 0
+        size_mq9 = sensor_data["mq9"].qsize()
+        while not sensor_data["mq9"].empty():
+            val = sensor_data["mq9"].get()
+            if (val == 0):
+                mq9_zero_counter += 1
+        if (mq9_zero_counter / size_mq9 >= 0.5):
+            top_mq9 = 0
+        else:
+            top_mq9 = 1
+
+    # Write to db
+    try:
+        connection = sqlite3.connect("../db/quakeDB.db")
+        cursor = connection.cursor()
+
+        cursor.execute('''
+            INSERT INTO sensor_data (
+                timestamp,
+                avg_humidity,
+                avg_temperature,
+                avg_delta_x,
+                avg_delta_y,
+                avg_delta_z,
+                top_flame,
+                top_mq2,
+                top_mq9
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            get_current_sql_time(),
+            avg_humidity,
+            avg_temperature,
+            avg_delta_x,
+            avg_delta_y,
+            avg_delta_z,
+            top_flame,
+            top_mq2,
+            top_mq9
+        ))
+
+        connection.commit()
+        connection.close()
+    
+    except sqlite3.Error as err:
+        print("Failed to insert data into sqlite table", err)
+    finally:
+        if connection:
+            connection.close()
+            print("The sqlite connection is closed")
+
 
 # Function to read AM2302 data
 def read_dht_data(interval):
@@ -46,7 +177,8 @@ def read_dht_data(interval):
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
                 with data_lock:
-                    sensor_data["humidity"].append((get_current_sql_time(), humidity, temperature,))
+                    sensor_data["humidity"].put((humidity, temperature,))
+                    ensure_queue_size()
         time.sleep(interval)
 
 
@@ -82,16 +214,16 @@ def read_mpu6050_data(interval):
                 or delta_z > accel.SHARP_MOVEMENT_THRESHOLD
             )
             if sharp_threshold_passed:
-                print("Sharp movement detected")
+                print("Sharp movement detected. RING ALARM RING ALARM RING ALARM RING ALARM RING ALARM")
 
             with data_lock:
-                sensor_data["acceleration"].append((
-                        get_current_sql_time(), 
+                sensor_data["acceleration"].put((
                         delta_x, 
                         delta_y, 
                         delta_z, 
                         sharp_threshold_passed,
                     ))
+                ensure_queue_size()
         time.sleep(interval)
 
 # Function to read KY-026 data
@@ -102,7 +234,8 @@ def read_flame_data(interval):
             flame = dd_sensor.read_dd(FLAME_PIN)
             # print('Flame status (0 - good; 1 - bad): ', flame)
             with data_lock:
-                sensor_data["flame"].append((get_current_sql_time(), flame))
+                sensor_data["flame"].put(flame)
+                ensure_queue_size()
         time.sleep(interval)
 
 
@@ -114,7 +247,8 @@ def read_mq2_data(interval):
             mq2 = dd_sensor.read_dd(MQ2_PIN)
             # print('Gas status (0 - bad; 1 - good): ', mq2)
             with data_lock:
-                sensor_data["mq2"].append((get_current_sql_time(), mq2))
+                sensor_data["mq2"].put(mq2)
+                ensure_queue_size()
         time.sleep(interval)
 
 
@@ -126,7 +260,8 @@ def read_mq9_data(interval):
             mq9 = dd_sensor.read_dd(MQ9_PIN)
             # print('Gas status (0 - bad; 1 - good): ', mq2)
             with data_lock:
-                sensor_data["mq9"].append((get_current_sql_time(), mq9))
+                sensor_data["mq9"].put(mq9)
+                ensure_queue_size()
         time.sleep(interval)
 
 
@@ -147,7 +282,7 @@ if __name__ == '__main__':
 
 
         while True:
-            print('----- 5 seconds has passed -----')
+            print('----- 5 seconds have passed -----')
             print(sensor_data)
             time.sleep(5)
 

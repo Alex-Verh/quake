@@ -1,3 +1,5 @@
+# FILE OBSOLETED BY main_threads.py
+
 # For now just have a single thread that reads sensor data together
 import dht      # humidity sensor
 import accel
@@ -22,7 +24,7 @@ enable_mq9 = False
 # The first entry in each dictionary is the time() when the data was recorded
 sensor_data = {
     "humidity": [],         # datetime (sql datetime), humidity (float), temperature (float)
-    "acceleration": [],     # datetime (sql datetime), delta_x (float), delta_y (float), delta_z (float), threshold_passed (boolean)
+    "acceleration": [],     # datetime (sql datetime), delta_x (float), delta_y (float), delta_z (float)
     "flame": [],            # datetime (sql datetime), digital_signal (0 - good; 1 - bad)
     "mq2": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
     "mq9": [],              # datetime (sql datetime), digital_signal (0 - bad; 1 - good)
@@ -74,7 +76,7 @@ while True:
             or delta_z > accel.SHARP_MOVEMENT_THRESHOLD
         )
         if sharp_threshold_passed:
-            print("Sharp movement detected")
+            print("Sharp movement detected. RING ALARM RING ALARM RING ALARM RING ALARM RING ALARM")
         sensor_data["acceleration"].append((get_current_sql_time(), delta_x, delta_y, delta_z, sharp_threshold_passed))
 
 
