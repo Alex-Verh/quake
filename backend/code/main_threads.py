@@ -9,12 +9,16 @@ import threading
 import queue
 import sqlite3
 
-# Constants
+# Input constants
 DHT_PIN = 4
 FLAME_PIN = 26
 MQ2_PIN = 4
 MQ9_PIN = 4
 
+# Output constants
+BUZZER_PIN = 24
+
+# Data constants
 DATA_QUEUE_SIZE = 300
 
 # Sensor enable control
