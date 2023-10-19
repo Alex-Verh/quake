@@ -15,6 +15,10 @@ body {
     font-weight: 700;
 }
 
+.none {
+    display: none;
+}
+
 .navbar {
     background-color: white;
     display: flex;

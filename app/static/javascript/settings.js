@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded",  () => {
                 editAddressBtn.classList.remove("settings-block__button_active");
                 emailInput.readOnly = true;
             } else {
-                emailModal.style.display = "block";
+                emailModal.classList.remove("none");
                 emailModalText.innerHTML = validateEmail(emailInput.value).detail;
             }
         } else {
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     // Modal Listeners //
     emailModalClose.addEventListener("click", function() {
-        emailModal.style.display = "none";
+        emailModal.classList.add("none");
     });
 
     // Email Validation Function // 
