@@ -4,35 +4,43 @@ body {
     overflow: hidden;
 }
 
+.live-states {
+    margin-top: 100px;
+}
+
 .my-box {
     background-color: white;
     border-radius: 20px;
-    padding: 16px;
+    padding: 5px 15px;
     margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 20vh;
+    text-align: center;
+
+    height: 125px;
+    width: 250px;
+
+    .my-box__image {
+        height: 30px;
+        margin-top: 25px; 
+        width: 100%;
+    }
+
+    .my-box__title {
+        font-family: Montserrat, sans-serif;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .my-box__text {
+        font-family: Montserrat, sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        width: 100%;
+    }
 }
 
-h1 {
-    margin: 10px 0 0 0;
-}
 
-p {
-    margin-top: 10px;
-    font-family: Montserrat;
-    font-size: 30px;
-}
-
-p1 {
+.emergency-number {
     font-size: 20px;
     font-weight: bold;
     color: red;
-}
-
-p2 {
-    font-weight: bold;
-    font-size: 25px;
 }
