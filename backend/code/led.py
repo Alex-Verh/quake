@@ -4,8 +4,8 @@ import time
 
 # The red and green LEDs are inverted on the sensor.
 LED_Red = 27 #22
-LED_Green = 22 #27
-LED_Blue = 17
+LED_Green = 17 #27
+LED_Blue = 22
 
 
 # Function to control led lights
@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     try:
         loop_led(27, 22, 17, 3)
+        # control_led(17, 27, 22, False, False, False)
     
     # clean up after the program is finished
     except KeyboardInterrupt:

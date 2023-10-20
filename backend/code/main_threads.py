@@ -13,19 +13,19 @@ import sqlite3
 
 # Input constants
 DHT_PIN = 4
-FLAME_PIN = 26
+FLAME_PIN = 4
 MQ2_PIN = 4
 MQ9_PIN = 4
 COLLECT_DATA_INTERVAL = 0.5
 UPLOAD_SQL_INTERVAL = 300
 
 # Output constants
-BUZZER_PIN = 24
-BUZZER_DURATION = 2
+BUZZER_PIN = 16
+BUZZER_ITERATIONS = 10
 # red and green leds are switched
-LED_RED = 27    # 22
-LED_GREEN = 22  # 27
-LED_BLUE = 17
+LED_RED = 27
+LED_GREEN = 17
+LED_BLUE = 22
 LED_ITERATIONS = 3
 
 # Data constants
@@ -35,7 +35,7 @@ HUMIDITY_MAX = 70
 TEMPERATURE_MAX = 50
 
 # Sensor enable control
-enable_dht = True
+enable_dht = False
 enable_accel = False
 enable_flame = True
 enable_mq2 = False
@@ -207,8 +207,15 @@ def upload_data_sql_thread(interval):
 # Function to trigger the alarm (LED + Buzzer)
 def trigger_alarm():
     print("Alarm triggered")
-    led.loop_led(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS)
-    buzzer.control_buzzer(BUZZER_PIN, True, BUZZER_DURATION)
+
+    buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
+    led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
+    
+    buzzer_thread.start()
+    led_thread.start()
+
+    buzzer_thread.join()
+    led_thread.join()
 
 # Function to read AM2302 data
 def read_dht_data(interval):
