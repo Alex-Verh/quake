@@ -1,8 +1,9 @@
 # A general script to read data from digital sensors (such as the flame sensor a the MQ sensors)
 
-import RPi.GPIO as GPIO
 
 def read_dd(INPUT_PIN):
+    import RPi.GPIO as GPIO
+
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(INPUT_PIN, GPIO.IN)
 

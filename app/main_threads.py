@@ -1,9 +1,6 @@
 # For now just have a single thread that reads sensor data together
-import dht      # humidity sensor
-import accel
-import dd_sensor
-import buzzer
-import led
+from sensors import accel, dd_sensor, buzzer, led
+#from sensors import dht
 
 import time
 import datetime
@@ -37,7 +34,7 @@ TEMPERATURE_MAX = 50
 # Sensor enable control
 enable_dht = False
 enable_accel = False
-enable_flame = True
+enable_flame = False
 enable_mq2 = False
 enable_mq9 = False
 
@@ -330,8 +327,7 @@ def read_mq9_data(interval):
         time.sleep(interval)
 
 
-if __name__ == '__main__':
-
+def main():
     try:
         dht_thread = threading.Thread(target=read_dht_data, name="dht_thread", args=(COLLECT_DATA_INTERVAL,))
         acceleration_thread = threading.Thread(target=read_mpu6050_data, name="acceleration_thread", args=(COLLECT_DATA_INTERVAL,))
@@ -359,3 +355,6 @@ if __name__ == '__main__':
         flame_thread.join()
         mq2_thread.join()
         mq9_thread.join()
+
+if __name__ == '__main__':
+    main()

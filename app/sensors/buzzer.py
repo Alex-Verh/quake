@@ -1,8 +1,8 @@
-import RPi.GPIO as GPIO
 import time
 
 # Function to control the buzzer
 def control_buzzer(BUZZER_PIN, status):
+    import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUZZER_PIN, GPIO.OUT)
 

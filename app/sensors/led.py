@@ -1,5 +1,4 @@
 # Required modules are imported and set up
-import RPi.GPIO as GPIO
 import time
 
 # The red and green LEDs are inverted on the sensor.
@@ -10,6 +9,7 @@ LED_Blue = 22
 
 # Function to control led lights
 def control_led(LED_RED, LED_GREEN, LED_BLUE, red_status, green_status, blue_status):
+    import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_RED, GPIO.OUT)
     GPIO.setup(LED_GREEN, GPIO.OUT)
