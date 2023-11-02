@@ -2,14 +2,15 @@
 import time
 
 # The red and green LEDs are inverted on the sensor.
-LED_Red = 27 #22
-LED_Green = 17 #27
-LED_Blue = 22
+LED_Red = 6 #22
+LED_Green = 5 #27
+LED_Blue = 13
 
 
 # Function to control led lights
 def control_led(LED_RED, LED_GREEN, LED_BLUE, red_status, green_status, blue_status):
     import RPi.GPIO as GPIO
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_RED, GPIO.OUT)
     GPIO.setup(LED_GREEN, GPIO.OUT)
@@ -38,7 +39,7 @@ def loop_led(LED_RED, LED_GREEN, LED_BLUE, iterations):
 if __name__ == "__main__":
 
     try:
-        loop_led(27, 22, 17, 3)
+        loop_led(LED_Red, LED_Green, LED_Blue, 3)
         # control_led(17, 27, 22, False, False, False)
     
     # clean up after the program is finished

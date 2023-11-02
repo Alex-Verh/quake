@@ -1,5 +1,5 @@
-# For now just have a single thread that reads sensor data together
-from sensors import accel, dd_sensor, buzzer, led
+# Import sensor modules
+from sensors import accel, dd_sensor, buzzer, led, dht
 #from sensors import dht
 
 import time
@@ -10,9 +10,9 @@ import sqlite3
 
 # Input constants
 DHT_PIN = 4
-FLAME_PIN = 4
-MQ2_PIN = 4
-MQ9_PIN = 4
+FLAME_PIN = 17
+MQ2_PIN = 27
+MQ9_PIN = 22
 COLLECT_DATA_INTERVAL = 0.5
 UPLOAD_SQL_INTERVAL = 300
 
@@ -20,9 +20,9 @@ UPLOAD_SQL_INTERVAL = 300
 BUZZER_PIN = 16
 BUZZER_ITERATIONS = 10
 # red and green leds are switched
-LED_RED = 27
-LED_GREEN = 17
-LED_BLUE = 22
+LED_RED = 6
+LED_GREEN = 5
+LED_BLUE = 13
 LED_ITERATIONS = 3
 
 # Data constants
@@ -32,11 +32,15 @@ HUMIDITY_MAX = 70
 TEMPERATURE_MAX = 50
 
 # Sensor enable control
-enable_dht = False
+enable_dht = True
 enable_accel = False
 enable_flame = False
 enable_mq2 = False
 enable_mq9 = False
+
+# Alarm enable control
+enable_buzzer = True
+enable_led = True
 
 # Sensor data dictionaries for each sensor
 # Time will be recorded when writing to the db
@@ -154,7 +158,7 @@ def upload_data_sql():
 
     # Insert into quakeDB.db
     try:
-        connection = sqlite3.connect("../db/quakeDB.db")
+        connection = sqlite3.connect("quakeDB.db")
         cursor = connection.cursor()
 
         cursor.execute('''
@@ -205,14 +209,22 @@ def upload_data_sql_thread(interval):
 def trigger_alarm():
     print("Alarm triggered")
 
-    buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
-    led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
-    
-    buzzer_thread.start()
-    led_thread.start()
+    buzzer_thread = None
+    led_thread = None
 
-    buzzer_thread.join()
-    led_thread.join()
+    if (enable_buzzer):
+        buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
+        buzzer_thread.start()
+
+    if (enable_led):
+        led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
+        led_thread.start()
+    
+    if (enable_buzzer):
+        buzzer_thread.join()
+
+    if (enable_led):
+        led_thread.join()
 
 # Function to read AM2302 data
 def read_dht_data(interval):
@@ -221,6 +233,8 @@ def read_dht_data(interval):
         if enable_dht:
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
+                print("Humidity: ", humidity, " Temperature: ", temperature)
+
                 if (humidity < HUMIDITY_MIN or humidity > HUMIDITY_MAX or temperature > TEMPERATURE_MAX):
                     print("Dangerous levels of humidity or temperature.")
                     trigger_alarm()
