@@ -30,11 +30,12 @@ DATA_QUEUE_SIZE = 300
 HUMIDITY_MIN = 30
 HUMIDITY_MAX = 70
 TEMPERATURE_MAX = 50
+SHARP_MOVEMENT_THRESHOLD = 15000
 
 # Sensor enable control
 enable_dht = True
-enable_accel = False
-enable_flame = False
+enable_accel = True
+enable_flame = True
 enable_mq2 = False
 enable_mq9 = False
 
@@ -162,6 +163,20 @@ def upload_data_sql():
         cursor = connection.cursor()
 
         cursor.execute('''
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                timestamp TIMESTAMP,
+                avg_humidity REAL,
+                avg_temperature REAL,
+                avg_delta_x REAL,
+                avg_delta_y REAL,
+                avg_delta_z REAL,
+                top_flame REAL,
+                top_mq2 REAL,
+                top_mq9 REAL
+            )
+        ''')
+
+        cursor.execute('''
             INSERT INTO sensor_data (
                 timestamp,
                 avg_humidity,
@@ -269,13 +284,13 @@ def read_mpu6050_data(interval):
             prev_acc_y = acc_y
             prev_acc_z = acc_z
 
-            # print("delta_x: ", delta_x, " delta_y: ", delta_y, " delta_z: ", delta_z)
+            print("delta_x: ", delta_x, " delta_y: ", delta_y, " delta_z: ", delta_z)
 
             # Check for sharp movement
             sharp_threshold_passed = (
-                delta_x > accel.SHARP_MOVEMENT_THRESHOLD 
-                or delta_y > accel.SHARP_MOVEMENT_THRESHOLD 
-                or delta_z > accel.SHARP_MOVEMENT_THRESHOLD
+                delta_x > SHARP_MOVEMENT_THRESHOLD 
+                or delta_y > SHARP_MOVEMENT_THRESHOLD 
+                or delta_z > SHARP_MOVEMENT_THRESHOLD
             )
             if sharp_threshold_passed:
                 print("Sharp movement detected.")
@@ -296,7 +311,7 @@ def read_flame_data(interval):
     while True:
         if enable_flame:
             flame = dd_sensor.read_dd(FLAME_PIN)
-            # print('Flame status (0 - good; 1 - bad): ', flame)
+            print('Flame status (0 - good; 1 - bad): ', flame)
             if (flame == 1):
                 print("Flame detected.")
                 trigger_alarm()
@@ -358,10 +373,10 @@ def main():
         sql_thread.start()
 
 
-        while True:
-            # print(sensor_data)
-            time.sleep(5)
-            print('----- 5 seconds have passed -----')
+        # while True:
+        #     # print(sensor_data)
+        #     time.sleep(5)
+        #     # print('----- 5 seconds have passed -----')
 
     except KeyboardInterrupt:
         dht_thread.join()
