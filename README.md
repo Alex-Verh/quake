@@ -15,7 +15,7 @@ The project "Quake" has been initiated for several compelling reasons:
 ## Building and Running
 1. Setup a virtual python environment
 2. Install the necessary dependencies via `pip install -r requirements.txt`
-3. Run the flask server via `flask --app app/app.py run`
+3. Run the flask server via `python app/app.py`
 
 ## Limitations of the Current System
 

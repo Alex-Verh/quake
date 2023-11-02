@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded",  () => {
     const temperatureChart = document.querySelector("#temperature-chart");
     const humidityChart = document.querySelector("#humidity-chart");
 
-
     // Create Chart Function
     const createDiagram = (divBlock, labels, series) => {
         var elem = new Chartist.Line(divBlock, 

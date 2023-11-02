@@ -1,13 +1,18 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
+from flask_socketio import SocketIO
 import config
-import main_threads
+#import main_threads
+import random
+import time
+from threading import Thread
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = random.randbytes(32)
+socketio = SocketIO(app)
 
 @app.route("/")
 def main():
-    return render_template("live-state.html", sensors = main_threads.sensor_data)
-
+    return redirect("/live-state")
 
 @app.route("/settings")
 def settings():
@@ -31,6 +36,24 @@ def set_config():
     config.save()
     return "success"
 
+@socketio.on('connect')
+def connect_event():
+    print('Client connected')
+
+
+def send_sensor_data():
+    while True:
+        time.sleep(1)  # Wait for 10 seconds
+        socketio.emit('sensors', {
+            "temperature": 21.0,
+            "humidity": 32,
+            "flammable_gas": False,
+            "earthquake": False,
+            "smoke": False,
+            "time": time.strftime("%H:%M", time.gmtime())
+        })
+
 if __name__ == "__main__":
-    main_threads.main()
-    app.run(debug=True)
+    #main_threads.main()
+    socketio.start_background_task(target=send_sensor_data)
+    socketio.run(app)
