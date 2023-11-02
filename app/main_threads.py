@@ -14,7 +14,7 @@ FLAME_PIN = 17
 MQ2_PIN = 27
 MQ9_PIN = 22
 COLLECT_DATA_INTERVAL = 0.5
-UPLOAD_SQL_INTERVAL = 300
+UPLOAD_SQL_INTERVAL = 5
 
 # Output constants
 BUZZER_PIN = 16
@@ -213,6 +213,32 @@ def upload_data_sql():
             print("The sqlite connection is closed")
 
 
+# Function to read data from the local database
+def read_data_sql():
+    data = []
+
+    try:
+        connection = sqlite3.connect("quakeDB.db")
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM sensor_data")
+        rows = cursor.fetchall()
+
+        col_names = [description[0] for description in cursor.description]
+        for row in rows:
+            data_dict = dict(zip(col_names, row))
+            data.append(data_dict)
+
+    except sqlite3.Error as err:
+        print("Failed to read data from sqlite table", err)
+    finally:
+        if connection:
+            connection.close()
+            print("The sqlite connection is closed")
+
+    return data
+
+
 # Function to create the upload_data_sql_thread
 def upload_data_sql_thread(interval):
     while True:
@@ -373,10 +399,9 @@ def main():
         sql_thread.start()
 
 
-        # while True:
-        #     # print(sensor_data)
-        #     time.sleep(5)
-        #     # print('----- 5 seconds have passed -----')
+        while True:
+            time.sleep(15)
+            print(read_data_sql())
 
     except KeyboardInterrupt:
         dht_thread.join()
