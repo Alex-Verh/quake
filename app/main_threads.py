@@ -14,7 +14,7 @@ FLAME_PIN = 17
 MQ2_PIN = 27
 MQ9_PIN = 22
 COLLECT_DATA_INTERVAL = 0.5
-UPLOAD_SQL_INTERVAL = 5
+UPLOAD_SQL_INTERVAL = 300
 
 # Output constants
 BUZZER_PIN = 16
@@ -40,8 +40,14 @@ enable_mq2 = False
 enable_mq9 = False
 
 # Alarm enable control
-enable_buzzer = True
+enable_buzzer = False
 enable_led = True
+
+# Create a lock object for synchronized access to sensor_data
+data_lock = threading.Lock()
+
+
+
 
 # Sensor data dictionaries for each sensor
 # Time will be recorded when writing to the db
@@ -52,6 +58,56 @@ sensor_data = {
     "mq2": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
     "mq9": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
 }
+
+
+# Function to read latest data entries from the sensor_data queus without poping the entries
+def get_latest_sensor_data_entry():
+    data = {}
+
+    with data_lock:
+
+        hum = temp = 0
+        i = len(sensor_data["humidity"].queue) - 1
+        if (i > -1):
+            hum, temp = sensor_data["humidity"].queue[i]
+        data["humidity"] = hum
+        data["temperature"] = temp
+        
+        val = False
+        i = len(sensor_data["acceleration"].queue) - 1
+        # print("flame: ", sensor_data["acceleration"])
+        # print("flame: ", sensor_data["acceleration"].queue)
+        # print("flame: ", sensor_data["acceleration"].queue[i])
+        if (i > -1):
+            delta_x, delta_y, delta_z = sensor_data["acceleration"].queue[i]
+            val = delta_x > SHARP_MOVEMENT_THRESHOLD or delta_y > SHARP_MOVEMENT_THRESHOLD or delta_z > SHARP_MOVEMENT_THRESHOLD
+        data["earthquake"] = val
+
+        val = False
+        i = len(sensor_data["flame"].queue) - 1
+        # print("flame: ", sensor_data["flame"])
+        # print("flame: ", sensor_data["flame"].queue)
+        # print("flame: ", sensor_data["flame"].queue[i])
+        if (i > -1):
+            val = sensor_data["flame"].queue[i] == 1
+        data["flame"] = val
+
+        val = False
+        i = len(sensor_data["mq2"].queue) - 1
+        if (i > -1):
+            val = sensor_data["mq2"].queue[i] == 0
+        data["smoke"] = val
+
+        val = False
+        i = len(sensor_data["mq9"].queue) - 1
+        if (i > -1):
+            val = sensor_data["mq9"].queue[i] == 0
+        data["gas"] = val
+        
+        data["time"] = get_current_sql_time()
+    
+    return data
+
 
 # We will set a maximum queue size of 300
 # Sensors will collect data every second -> 5 minutes * 60 seconds = 300 entries
@@ -66,9 +122,6 @@ def ensure_queue_size():
 def get_current_sql_time():
     current_time = datetime.datetime.now()
     return current_time.strftime("%Y-%m-%d %H:%M:%S")
-
-# Create a lock object for synchronized access to sensor_data
-data_lock = threading.Lock()
 
 
 # Function to upload the average of collected datat to the db
@@ -261,20 +314,21 @@ def trigger_alarm():
         led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
         led_thread.start()
     
-    if (enable_buzzer):
-        buzzer_thread.join()
+    # if (enable_buzzer):
+    #     buzzer_thread.join()
 
-    if (enable_led):
-        led_thread.join()
+    # if (enable_led):
+    #     led_thread.join()
+
 
 # Function to read AM2302 data
 def read_dht_data(interval):
-    print("Reading dht data...")
+    # print("Reading dht data...")
     while True:
         if enable_dht:
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
-                print("Humidity: ", humidity, " Temperature: ", temperature)
+                # print("Humidity: ", humidity, " Temperature: ", temperature)
 
                 if (humidity < HUMIDITY_MIN or humidity > HUMIDITY_MAX or temperature > TEMPERATURE_MAX):
                     print("Dangerous levels of humidity or temperature.")
@@ -289,7 +343,7 @@ def read_dht_data(interval):
 
 # Function to read MPU6050 data
 def read_mpu6050_data(interval):
-    print("Reading accelerator data...")
+    # print("Reading accelerator data...")
     # Accelerometer previous values
     prev_acc_x = 0
     prev_acc_y = 0
@@ -310,7 +364,7 @@ def read_mpu6050_data(interval):
             prev_acc_y = acc_y
             prev_acc_z = acc_z
 
-            print("delta_x: ", delta_x, " delta_y: ", delta_y, " delta_z: ", delta_z)
+            # print("delta_x: ", delta_x, " delta_y: ", delta_y, " delta_z: ", delta_z)
 
             # Check for sharp movement
             sharp_threshold_passed = (
@@ -333,11 +387,11 @@ def read_mpu6050_data(interval):
 
 # Function to read KY-026 data
 def read_flame_data(interval):
-    print("Reading flame data...")
+    # print("Reading flame data...")
     while True:
         if enable_flame:
             flame = dd_sensor.read_dd(FLAME_PIN)
-            print('Flame status (0 - good; 1 - bad): ', flame)
+            # print('Flame status (0 - good; 1 - bad): ', flame)
             if (flame == 1):
                 print("Flame detected.")
                 trigger_alarm()
@@ -350,7 +404,7 @@ def read_flame_data(interval):
 
 # Function to read MQ-2 data
 def read_mq2_data(interval):
-    print("Reading mq2 data...")
+    # print("Reading mq2 data...")
     while True:
         if enable_mq2:
             mq2 = dd_sensor.read_dd(MQ2_PIN)
@@ -367,7 +421,7 @@ def read_mq2_data(interval):
 
 # Function to read MQ-9 data
 def read_mq9_data(interval):
-    print("Reading mq9 data...")
+    # print("Reading mq9 data...")
     while True:
         if enable_mq9:
             mq9 = dd_sensor.read_dd(MQ9_PIN)
@@ -398,11 +452,6 @@ def main():
         mq9_thread.start()
         sql_thread.start()
 
-
-        while True:
-            time.sleep(15)
-            print(read_data_sql())
-
     except KeyboardInterrupt:
         dht_thread.join()
         acceleration_thread.join()
@@ -410,5 +459,10 @@ def main():
         mq2_thread.join()
         mq9_thread.join()
 
+
 if __name__ == '__main__':
     main()
+
+    while True:
+        time.sleep(1)
+        print(get_latest_sensor_data_entry())
