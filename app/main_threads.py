@@ -8,13 +8,13 @@ import threading
 import queue
 import sqlite3
 
-# Input constants
+# Input constants (intervals are measured in seconds)
 DHT_PIN = 4
 FLAME_PIN = 17
 MQ2_PIN = 27
 MQ9_PIN = 22
 COLLECT_DATA_INTERVAL = 0.5
-UPLOAD_SQL_INTERVAL = 300
+UPLOAD_SQL_INTERVAL = 60
 
 # Output constants
 BUZZER_PIN = 16
@@ -26,7 +26,7 @@ LED_BLUE = 13
 LED_ITERATIONS = 3
 
 # Data constants
-DATA_QUEUE_SIZE = 300
+DATA_QUEUE_SIZE = UPLOAD_SQL_INTERVAL / COLLECT_DATA_INTERVAL
 HUMIDITY_MIN = 30
 HUMIDITY_MAX = 70
 TEMPERATURE_MAX = 50
@@ -268,7 +268,7 @@ def upload_data_sql():
 
 # Function to read data from the local database
 def read_data_sql():
-    data = []
+    data_dict = {}
 
     try:
         connection = sqlite3.connect("quakeDB.db")
@@ -278,9 +278,14 @@ def read_data_sql():
         rows = cursor.fetchall()
 
         col_names = [description[0] for description in cursor.description]
+
+        # initialization
+        for col in col_names:
+            data_dict[col] = []
+
         for row in rows:
-            data_dict = dict(zip(col_names, row))
-            data.append(data_dict)
+            for col, value in zip(col_names, row):
+                data_dict[col].append(value)
 
     except sqlite3.Error as err:
         print("Failed to read data from sqlite table", err)
@@ -289,7 +294,7 @@ def read_data_sql():
             connection.close()
             print("The sqlite connection is closed")
 
-    return data
+    return data_dict
 
 
 # Function to create the upload_data_sql_thread
@@ -465,4 +470,5 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(1)
-        print(get_latest_sensor_data_entry())
+        # print(get_latest_sensor_data_entry())
+        print(read_data_sql())

@@ -41,7 +41,7 @@ def connect_event():
     print('Client connected')
 
 
-def send_sensor_data():
+def send_live_data():
     while True:
         time.sleep(1)  # Wait for 10 seconds
         # socketio.emit('sensors', {
@@ -64,7 +64,16 @@ def send_sensor_data():
                 "time": data["time"]
             })
 
+
+def send_data_history():
+    while True:
+        data = main_threads.read_data_sql()
+        socketio.emit('history', data)
+        time.sleep(1)   # wait for 10 seconds
+
+
 if __name__ == "__main__":
     main_threads.main()
-    socketio.start_background_task(target=send_sensor_data)
+    socketio.start_background_task(target=send_live_data)
+    socketio.start_background_task(target=send_data_history)
     socketio.run(app)
