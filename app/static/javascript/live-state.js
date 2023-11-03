@@ -6,7 +6,14 @@ document.addEventListener("DOMContentLoaded",  () => {
 	socket.on('sensors', sensors => {
 		console.log(sensors)
 		document.querySelector("#temperature").innerHTML = sensors["temperature"] + "°C";
+		let colour = "green";
+		if (sensors["temperature"] > 50) { colour = "red"; }
+		document.querySelector("#temperature").style.color = colour;
+
 		document.querySelector("#humidity").innerHTML = sensors["humidity"] + "%";
+		colour = "green";
+		if (sensors["humidity"] >= 70 || sensors["humidity"] <= 30) { colour = "red"; }
+		document.querySelector("#humidity").style.color = colour;
 
 		document.querySelector("#smoke").innerHTML = bool_to_msg(sensors["smoke"], "smoke");
 		document.querySelector("#smoke").style.color = bool_to_colour(sensors["smoke"]);
