@@ -1,9 +1,6 @@
-# For now just have a single thread that reads sensor data together
-import dht      # humidity sensor
-import accel
-import dd_sensor
-import buzzer
-import led
+# Import sensor modules
+from sensors import accel, dd_sensor, buzzer, led, dht
+#from sensors import dht
 
 import time
 import datetime
@@ -11,35 +8,46 @@ import threading
 import queue
 import sqlite3
 
-# Input constants
+# Input constants (intervals are measured in seconds)
 DHT_PIN = 4
-FLAME_PIN = 4
-MQ2_PIN = 4
-MQ9_PIN = 4
+FLAME_PIN = 17
+MQ2_PIN = 27
+MQ9_PIN = 22
 COLLECT_DATA_INTERVAL = 0.5
-UPLOAD_SQL_INTERVAL = 300
+UPLOAD_SQL_INTERVAL = 60
 
 # Output constants
 BUZZER_PIN = 16
 BUZZER_ITERATIONS = 10
 # red and green leds are switched
-LED_RED = 27
-LED_GREEN = 17
-LED_BLUE = 22
+LED_RED = 6
+LED_GREEN = 5
+LED_BLUE = 13
 LED_ITERATIONS = 3
 
 # Data constants
-DATA_QUEUE_SIZE = 300
+DATA_QUEUE_SIZE = UPLOAD_SQL_INTERVAL / COLLECT_DATA_INTERVAL
 HUMIDITY_MIN = 30
 HUMIDITY_MAX = 70
 TEMPERATURE_MAX = 50
+SHARP_MOVEMENT_THRESHOLD = 15000
 
 # Sensor enable control
-enable_dht = False
-enable_accel = False
+enable_dht = True
+enable_accel = True
 enable_flame = True
 enable_mq2 = False
 enable_mq9 = False
+
+# Alarm enable control
+enable_buzzer = False
+enable_led = True
+
+# Create a lock object for synchronized access to sensor_data
+data_lock = threading.Lock()
+
+
+
 
 # Sensor data dictionaries for each sensor
 # Time will be recorded when writing to the db
@@ -50,6 +58,56 @@ sensor_data = {
     "mq2": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
     "mq9": queue.Queue(),              # digital_signal (0 - bad; 1 - good)
 }
+
+
+# Function to read latest data entries from the sensor_data queus without poping the entries
+def get_latest_sensor_data_entry():
+    data = {}
+
+    with data_lock:
+
+        hum = temp = 0
+        i = len(sensor_data["humidity"].queue) - 1
+        if (i > -1):
+            hum, temp = sensor_data["humidity"].queue[i]
+        data["humidity"] = hum
+        data["temperature"] = temp
+        
+        val = False
+        i = len(sensor_data["acceleration"].queue) - 1
+        # print("flame: ", sensor_data["acceleration"])
+        # print("flame: ", sensor_data["acceleration"].queue)
+        # print("flame: ", sensor_data["acceleration"].queue[i])
+        if (i > -1):
+            delta_x, delta_y, delta_z = sensor_data["acceleration"].queue[i]
+            val = delta_x > SHARP_MOVEMENT_THRESHOLD or delta_y > SHARP_MOVEMENT_THRESHOLD or delta_z > SHARP_MOVEMENT_THRESHOLD
+        data["earthquake"] = val
+
+        val = False
+        i = len(sensor_data["flame"].queue) - 1
+        # print("flame: ", sensor_data["flame"])
+        # print("flame: ", sensor_data["flame"].queue)
+        # print("flame: ", sensor_data["flame"].queue[i])
+        if (i > -1):
+            val = sensor_data["flame"].queue[i] == 1
+        data["flame"] = val
+
+        val = False
+        i = len(sensor_data["mq2"].queue) - 1
+        if (i > -1):
+            val = sensor_data["mq2"].queue[i] == 0
+        data["smoke"] = val
+
+        val = False
+        i = len(sensor_data["mq9"].queue) - 1
+        if (i > -1):
+            val = sensor_data["mq9"].queue[i] == 0
+        data["gas"] = val
+        
+        data["time"] = get_current_sql_time()
+    
+    return data
+
 
 # We will set a maximum queue size of 300
 # Sensors will collect data every second -> 5 minutes * 60 seconds = 300 entries
@@ -64,9 +122,6 @@ def ensure_queue_size():
 def get_current_sql_time():
     current_time = datetime.datetime.now()
     return current_time.strftime("%Y-%m-%d %H:%M:%S")
-
-# Create a lock object for synchronized access to sensor_data
-data_lock = threading.Lock()
 
 
 # Function to upload the average of collected datat to the db
@@ -157,8 +212,22 @@ def upload_data_sql():
 
     # Insert into quakeDB.db
     try:
-        connection = sqlite3.connect("../db/quakeDB.db")
+        connection = sqlite3.connect("quakeDB.db")
         cursor = connection.cursor()
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS sensor_data (
+                timestamp TIMESTAMP,
+                avg_humidity REAL,
+                avg_temperature REAL,
+                avg_delta_x REAL,
+                avg_delta_y REAL,
+                avg_delta_z REAL,
+                top_flame REAL,
+                top_mq2 REAL,
+                top_mq9 REAL
+            )
+        ''')
 
         cursor.execute('''
             INSERT INTO sensor_data (
@@ -197,6 +266,37 @@ def upload_data_sql():
             print("The sqlite connection is closed")
 
 
+# Function to read data from the local database
+def read_data_sql():
+    data_dict = {}
+
+    try:
+        connection = sqlite3.connect("quakeDB.db")
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM sensor_data")
+        rows = cursor.fetchall()
+
+        col_names = [description[0] for description in cursor.description]
+
+        # initialization
+        for col in col_names:
+            data_dict[col] = []
+
+        for row in rows:
+            for col, value in zip(col_names, row):
+                data_dict[col].append(value)
+
+    except sqlite3.Error as err:
+        print("Failed to read data from sqlite table", err)
+    finally:
+        if connection:
+            connection.close()
+            print("The sqlite connection is closed")
+
+    return data_dict
+
+
 # Function to create the upload_data_sql_thread
 def upload_data_sql_thread(interval):
     while True:
@@ -208,22 +308,33 @@ def upload_data_sql_thread(interval):
 def trigger_alarm():
     print("Alarm triggered")
 
-    buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
-    led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
-    
-    buzzer_thread.start()
-    led_thread.start()
+    buzzer_thread = None
+    led_thread = None
 
-    buzzer_thread.join()
-    led_thread.join()
+    if (enable_buzzer):
+        buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
+        buzzer_thread.start()
+
+    if (enable_led):
+        led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
+        led_thread.start()
+    
+    # if (enable_buzzer):
+    #     buzzer_thread.join()
+
+    # if (enable_led):
+    #     led_thread.join()
+
 
 # Function to read AM2302 data
 def read_dht_data(interval):
-    print("Reading dht data...")
+    # print("Reading dht data...")
     while True:
         if enable_dht:
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
+                # print("Humidity: ", humidity, " Temperature: ", temperature)
+
                 if (humidity < HUMIDITY_MIN or humidity > HUMIDITY_MAX or temperature > TEMPERATURE_MAX):
                     print("Dangerous levels of humidity or temperature.")
                     trigger_alarm()
@@ -237,7 +348,7 @@ def read_dht_data(interval):
 
 # Function to read MPU6050 data
 def read_mpu6050_data(interval):
-    print("Reading accelerator data...")
+    # print("Reading accelerator data...")
     # Accelerometer previous values
     prev_acc_x = 0
     prev_acc_y = 0
@@ -262,9 +373,9 @@ def read_mpu6050_data(interval):
 
             # Check for sharp movement
             sharp_threshold_passed = (
-                delta_x > accel.SHARP_MOVEMENT_THRESHOLD 
-                or delta_y > accel.SHARP_MOVEMENT_THRESHOLD 
-                or delta_z > accel.SHARP_MOVEMENT_THRESHOLD
+                delta_x > SHARP_MOVEMENT_THRESHOLD 
+                or delta_y > SHARP_MOVEMENT_THRESHOLD 
+                or delta_z > SHARP_MOVEMENT_THRESHOLD
             )
             if sharp_threshold_passed:
                 print("Sharp movement detected.")
@@ -281,7 +392,7 @@ def read_mpu6050_data(interval):
 
 # Function to read KY-026 data
 def read_flame_data(interval):
-    print("Reading flame data...")
+    # print("Reading flame data...")
     while True:
         if enable_flame:
             flame = dd_sensor.read_dd(FLAME_PIN)
@@ -298,7 +409,7 @@ def read_flame_data(interval):
 
 # Function to read MQ-2 data
 def read_mq2_data(interval):
-    print("Reading mq2 data...")
+    # print("Reading mq2 data...")
     while True:
         if enable_mq2:
             mq2 = dd_sensor.read_dd(MQ2_PIN)
@@ -315,7 +426,7 @@ def read_mq2_data(interval):
 
 # Function to read MQ-9 data
 def read_mq9_data(interval):
-    print("Reading mq9 data...")
+    # print("Reading mq9 data...")
     while True:
         if enable_mq9:
             mq9 = dd_sensor.read_dd(MQ9_PIN)
@@ -330,8 +441,7 @@ def read_mq9_data(interval):
         time.sleep(interval)
 
 
-if __name__ == '__main__':
-
+def main():
     try:
         dht_thread = threading.Thread(target=read_dht_data, name="dht_thread", args=(COLLECT_DATA_INTERVAL,))
         acceleration_thread = threading.Thread(target=read_mpu6050_data, name="acceleration_thread", args=(COLLECT_DATA_INTERVAL,))
@@ -347,15 +457,18 @@ if __name__ == '__main__':
         mq9_thread.start()
         sql_thread.start()
 
-
-        while True:
-            # print(sensor_data)
-            time.sleep(5)
-            print('----- 5 seconds have passed -----')
-
     except KeyboardInterrupt:
         dht_thread.join()
         acceleration_thread.join()
         flame_thread.join()
         mq2_thread.join()
         mq9_thread.join()
+
+
+if __name__ == '__main__':
+    main()
+
+    while True:
+        time.sleep(1)
+        # print(get_latest_sensor_data_entry())
+        print(read_data_sql())

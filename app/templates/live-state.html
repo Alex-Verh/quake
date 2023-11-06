@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block title %} {{ super() }} Live State {% endblock %}
 {% block css %} <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/live-state.css')}}"/> {% endblock %}
-{% block javascript %} <script type="module" charset="utf-8" src="{{url_for('static', filename='javascript/live-state.js')}}"></script> {% endblock %}
+{% block javascript %}
+<script type="module" charset="utf-8" src="{{url_for('static', filename='javascript/live-state.js')}}"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+{% endblock %}
 {% block content %}
+
 <main>
     <div class="container">
         <div class="live-states">
@@ -11,49 +15,49 @@
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/temperature.svg')}}" alt="Temperature">
                         <span class="my-box__title">Temperature</span>
-                        <p class="my-box__text">25.5°</p>
+                        <p class="my-box__text" id="temperature">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
                         <span class="my-box__title">Earthquake</span>
-                        <p class="my-box__text">N/A</p>
+                        <p class="my-box__text" id="earthquake">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/smoke.svg')}}" alt="Smoke">
                         <span class="my-box__title">Smoke</span>
-                        <p class="my-box__text">70%</p>
+                        <p class="my-box__text" id="smoke">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/humidity.svg')}}" alt="Humidity">
                         <span class="my-box__title">Humidity</span>
-                        <p class="my-box__text">45%</p>
+                        <p class="my-box__text" id="humidity">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/fire.svg')}}" alt="Fire">
                         <span class="my-box__title">Flame</span>
-                        <p class="my-box__text">N/A</p>
+                        <p class="my-box__text" id="flame">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/gas.svg')}}" alt="Gas">
                         <span class="my-box__title">Flammable Gas</span>
-                        <p class="my-box__text">N/A</p>
+                        <p class="my-box__text" id="gas">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/clock.svg')}}" alt="Time">
                         <span class="my-box__title">Current time </span>
-                        <p class="my-box__text">23:51</p>
+                        <p class="my-box__text" id="time">?</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
@@ -67,7 +71,7 @@
                     <div class="my-box">
                         <img class="my-box__image" src="{{url_for('static', filename='images/calendar.svg')}}" alt="Date">
                         <span class="my-box__title">Date</span>
-                        <p class="my-box__text">14/9/2023</p>
+                        <p class="my-box__text" id="date">?</p>
                     </div>
                 </div>
             </div>

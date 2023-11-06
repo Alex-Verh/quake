@@ -1,3 +1,2 @@
 /env
-/app/__pycache__
-/backend/code/__pycache__
+/app/__pycache__backend/db/quakeDB.db
