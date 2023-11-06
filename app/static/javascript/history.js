@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     const temperatureChart = document.querySelector("#temperature-chart");
     const humidityChart = document.querySelector("#humidity-chart");
+    const earhquakeChart = document.querySelector("#earthquake-chart")
 
     // Create Chart Function
     const createDiagram = (divBlock, labels, series) => {
@@ -19,6 +20,21 @@ document.addEventListener("DOMContentLoaded",  () => {
             },
         ); 
 
+        // Animate the lines
+        elem.on('draw', function(data) {
+            if(data.type === 'line' || data.type === 'area') {
+                data.element.animate({
+                    d: {
+                        begin: 2000 * data.index,
+                        dur: 2000,
+                        from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
+                        to: data.path.clone().stringify(),
+                        easing: Chartist.Svg.Easing.easeOutQuint
+                    }
+                });
+            }
+        });
+
         return elem;
     }
 
@@ -27,15 +43,18 @@ document.addEventListener("DOMContentLoaded",  () => {
         while (data.labels.length > length) {
             data.labels.shift();
         }
-        while (data.series[0].length > length) {
-            data.series[0].shift();
+        for (let i = 0; i < data.series.length; i++) {
+            while (data.series[i].length > length) {
+                data.series[i].shift();
+            }
         }
         chart.update(data);
     }
     
-    // Reference to the chards
+    // Reference to the charts
     let tempCht = createDiagram(temperatureChart, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], [[29, 30, 15, 10, 0]]);
     let humidityCht = createDiagram(humidityChart, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], [[81, 65, 15, 98, 0]]);
+    let earthCht = createDiagram(earhquakeChart, ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], [[81, 65, 15, 98, 0], [0, 98, 15, 65, 81], [15, 0, 81, 15, 65]]);
 
     // History Parameters' Dropdowns
     document.addEventListener("click", (e) => {
@@ -61,8 +80,7 @@ document.addEventListener("DOMContentLoaded",  () => {
         console.log("connected");
     });
     socket.on('history', history_data => {
-        console.log(history_data);
-        // console.log(data['avg_humidity']);
+        // console.log(history_data);
         const time_labels = history_data['timestamp'].map(timestamp => {
             const parts = timestamp.split(' ')[1].split(':');
             return parts[0] + ':' + parts[1];
@@ -72,9 +90,14 @@ document.addEventListener("DOMContentLoaded",  () => {
             labels: time_labels,
             series: [history_data['avg_temperature']]
         };
-        updateChart(tempCht, data, 10);
+        updateChart(tempCht, data, 20);
 
+        data.labels = time_labels
         data.series = [history_data['avg_humidity']];
         updateChart(humidityCht, data, 20);
+
+        data.labels = time_labels
+        data.series = [history_data['avg_delta_x'], history_data['avg_delta_y'], history_data['avg_delta_z']];
+        updateChart(earthCht, data, 20);
     });
 });

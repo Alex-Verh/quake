@@ -4,7 +4,6 @@ import config
 import main_threads
 import random
 import time
-from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = random.randbytes(32)
@@ -29,12 +28,26 @@ def livestate():
 
 @app.route("/set_config", methods = ["POST"])
 def set_config():
-    name = request.args.get('name')
-    value = request.args.get('value')
+    data = request.get_json()
+    name = data.get('name')
+    value = data.get('value')
     print("Setting", name, "to", value)
     config.config[name] = value
     config.save()
     return "success"
+
+@app.route("/get_config", methods = ["GET"])
+def get_config():
+    name = request.args.get('name')
+    value = "404"
+    if (name in config.config):
+        value = config.config[name]
+    print("Returning value ", value, " for variable ", name)
+    return value
+
+@app.route("/get_all_config", methods = ["GET"])
+def get_all_config():
+    return config.config
 
 @socketio.on('connect')
 def connect_event():
@@ -43,15 +56,6 @@ def connect_event():
 
 def send_live_data():
     while True:
-        time.sleep(1)  # Wait for 10 seconds
-        # socketio.emit('sensors', {
-        #     "temperature": 21.0,
-        #     "humidity": 32,
-        #     "flammable_gas": False,
-        #     "earthquake": False,
-        #     "smoke": False,
-        #     "time": time.strftime("%H:%M", time.gmtime())
-        # })
         data = main_threads.get_latest_sensor_data_entry()
         if (len(data) > 0):
             socketio.emit('sensors', {
@@ -63,13 +67,14 @@ def send_live_data():
                 "gas": data["gas"],
                 "time": data["time"]
             })
+        time.sleep(1)
 
 
 def send_data_history():
     while True:
         data = main_threads.read_data_sql()
         socketio.emit('history', data)
-        time.sleep(1)   # wait for 10 seconds
+        time.sleep(10)   # wait for 10 seconds
 
 
 if __name__ == "__main__":

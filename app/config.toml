@@ -1,0 +1,11 @@
+enable_dht = true
+enable_accel = true
+sharp_movement_threshold = 15000
+enable_flame = true
+enable_mq2 = false
+enable_mq9 = false
+humidity_min = 30
+humidity_max = 70
+temperature_max = 50
+enable_buzzer = true
+enable_led = true

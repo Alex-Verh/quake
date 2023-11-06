@@ -49,6 +49,22 @@
             <div class="ct-chart" id="humidity-chart"></div>
         </div>
         <div class="history-parameter">
+            <div class="row  d-flex align-items-center">
+                <div class="col-1 d-flex justify-content-center">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
+                </div>
+                <div class="col-10">
+                    <div class="history-parameter__title">Seismic Activity History</div>
+                </div>
+                <div class="col-1">
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
+                </div>
+            </div>
+        </div>
+        <div class="history-analytics history-analytics_graph d-flex align-items-center justify-content-center none">
+            <div class="ct-chart" id="earthquake-chart"></div>
+        </div>
+        <div class="history-parameter">
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/fire.svg')}}" alt="Fire">
