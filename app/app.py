@@ -52,6 +52,10 @@ def get_config():
     print("Returning value ", value, " for variable ", name)
     return value
 
+@app.route("/get_all_config", methods = ["GET"])
+def get_all_config():
+    return config.config
+
 # @socketio.on('connect')
 # def connect_event():
 #     print('Client connected')
