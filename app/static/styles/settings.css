@@ -7,6 +7,8 @@
     border-radius: 20px;
     padding: 15px 0;
     margin: 20px 0;
+    border: 2px solid #000;
+
 
     .settings-block__title {
         font-size: 16px;
@@ -59,14 +61,14 @@
     }
 
     .settings-block__radio:checked + .settings-block__label {
-        border-bottom: 3px solid #0b0055;
+        border-bottom: 3px solid #000;
     }
 
     .settings-block__slider {
         width: 100%;
         -webkit-appearance: none;
         appearance: none;
-        background: #001453;
+        background: #000;
         height: 3px;
         outline: none;
         border-inline: 5px solid red;
@@ -78,7 +80,7 @@
         height: 17px;
         width: 17px;
         border-radius: 50%;
-        background: #001453;
+        background: #000;
     }
 }
 
@@ -125,12 +127,12 @@
     color: #fff;
 }
 
-.yellow-light {
-    color: #E5D283;
+.grey {
+    color: #DDE6ED;
 }
 
 .blue-light {
-    color: #4F709C;
+    color: #27374D;
 }
 
 .yellow-dark {

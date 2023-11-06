@@ -1,3 +1,5 @@
+import {fetchTheme} from "./general.js";
+
 document.addEventListener("DOMContentLoaded",  () => {
 
     const temperatureChart = document.querySelector("#temperature-chart");
@@ -77,4 +79,6 @@ document.addEventListener("DOMContentLoaded",  () => {
         data.series = [history_data['avg_humidity']];
         updateChart(humidityCht, data, 20);
     });
+
+    fetchTheme();
 });

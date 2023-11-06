@@ -1,6 +1,6 @@
 temperature_max = "54"
 humidity_max = "5"
-sharp_movement_threshold = 30000
+sharp_movement_threshold = 10000
 enable_flame = false
 enable_dht = true
 enable_mq9 = true
@@ -11,5 +11,5 @@ date_format = "2"
 time_format = "3"
 enable_led = "false"
 enable_buzzer = "false"
-notification = "off"
+notification = "on"
 email = "myemail@yahoo.org"

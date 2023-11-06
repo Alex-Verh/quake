@@ -1,3 +1,5 @@
+import {fetchTheme, updateTheme} from "./general.js";
+
 document.addEventListener("DOMContentLoaded",  () => {
 
     const editAddressBtn = document.querySelector("#edit-address-button");
@@ -126,8 +128,15 @@ document.addEventListener("DOMContentLoaded",  () => {
                     updateConfig("date_format", settingValue.replace(/^\D+/g, ''));
                     break;
                 case "color1":
+                    updateTheme(1, true);
+                    updateConfig("color_format", settingValue.replace(/^\D+/g, ''));
+                    break;
                 case "color2":
+                    updateTheme(2, true);
+                    updateConfig("color_format", settingValue.replace(/^\D+/g, ''));
+                    break;
                 case "color3":
+                    updateTheme(3, true);
                     updateConfig("color_format", settingValue.replace(/^\D+/g, ''));
                     break;
             }
@@ -196,4 +205,5 @@ document.addEventListener("DOMContentLoaded",  () => {
           });
     }      
     
+    fetchTheme();
 });

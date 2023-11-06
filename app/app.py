@@ -20,12 +20,18 @@ def settings():
 
 @app.route("/history")
 def history():
-    return render_template("history.html")
+    theme = 1
+    if ("color_format" in config.config):
+        theme = config.config["color_format"]
+    return render_template("history.html", theme=theme)
 
 
 @app.route("/live-state")
 def livestate():
-    return render_template("live-state.html")
+    theme = 1
+    if ("color_format" in config.config):
+        theme = config.config["color_format"]
+    return render_template("live-state.html", theme=theme)
 
 @app.route("/set_config", methods = ["POST"])
 def set_config():
