@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect
-from flask_socketio import SocketIO
+# from flask_socketio import SocketIO
 import config
-import main_threads
+# import main_threads
 import random
 import time
 from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = random.randbytes(32)
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 
 @app.route("/")
 def main():
@@ -29,16 +29,26 @@ def livestate():
 
 @app.route("/set_config", methods = ["POST"])
 def set_config():
-    name = request.args.get('name')
-    value = request.args.get('value')
+    data = request.get_json()
+    name = data.get('name')
+    value = data.get('value')
     print("Setting", name, "to", value)
     config.config[name] = value
     config.save()
     return "success"
 
-@socketio.on('connect')
-def connect_event():
-    print('Client connected')
+@app.route("/get_config", methods = ["GET"])
+def get_config():
+    name = request.args.get('name')
+    value = "404"
+    if (name in config.config):
+        value = config.config[name]
+    print("Returning value ", value, " for variable ", name)
+    return value
+
+# @socketio.on('connect')
+# def connect_event():
+#     print('Client connected')
 
 
 def send_live_data():
@@ -73,7 +83,10 @@ def send_data_history():
 
 
 if __name__ == "__main__":
-    main_threads.main()
-    socketio.start_background_task(target=send_live_data)
-    socketio.start_background_task(target=send_data_history)
-    socketio.run(app)
+    app.run(debug=True)
+
+# if __name__ == "__main__":
+#     main_threads.main()
+#     socketio.start_background_task(target=send_live_data)
+#     socketio.start_background_task(target=send_data_history)
+#     socketio.run(app)

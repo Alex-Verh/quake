@@ -1,3 +1,5 @@
 /env
 /app/__pycache__backend/db/quakeDB.db
 /app/__pycache__
+/app/config.toml
+/app/sensors/__pycache__/accel.cpython-310.pyc
