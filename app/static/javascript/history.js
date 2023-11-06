@@ -1,3 +1,5 @@
+import {fetchTheme} from "./general.js";
+
 document.addEventListener("DOMContentLoaded",  () => {
 
     const temperatureChart = document.querySelector("#temperature-chart");
@@ -100,4 +102,6 @@ document.addEventListener("DOMContentLoaded",  () => {
         data.series = [history_data['avg_delta_x'], history_data['avg_delta_y'], history_data['avg_delta_z']];
         updateChart(earthCht, data, 20);
     });
+
+    fetchTheme();
 });

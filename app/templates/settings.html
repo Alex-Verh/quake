@@ -46,6 +46,36 @@
                     </div>
                 </div>
             </div>
+            <div class="settings-block__field">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-2">
+                            Sound Alarm
+                        </div>
+                        <div class="col-4 d-flex align-items-center">
+                            <input class="settings-block__input" type="text" name="agreement" id="agreement" value="Caution! Enabling sound alarm may hurt people sensible to loud audio effects." readonly>
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center">
+                            <div class="settings-block__button settings-block__button_active" id="enable-sound-button">Enabled</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-block__field">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-2">
+                            Light Alarm
+                        </div>
+                        <div class="col-4 d-flex align-items-center">
+                            <input class="settings-block__input" type="text" name="agreement" id="agreement" value="Caution! Enabling light alarm may hurt people sensible to visual effects." readonly>
+                        </div>
+                        <div class="col-2 d-flex align-items-center justify-content-center">
+                            <div class="settings-block__button settings-block__button_active" id="enable-light-button">Enabled</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="settings-block">
             <div class="settings-block__title">Preference Settings</div>
@@ -104,7 +134,7 @@
                         </div>
                         <div class="col-3 d-flex justify-content-center">
                             <input class="settings-block__radio" type="radio" name="color-format" id="color2">
-                            <label class="settings-block__label colors" for="color2"><span class="yellow-light">yellow</span> / <span class="blue-light">blue</span></label>
+                            <label class="settings-block__label colors" for="color2"><span class="grey">grey</span> / <span class="blue-light">blue</span></label>
                         </div>
                         <div class="col-3 d-flex justify-content-center">
                             <input class="settings-block__radio" type="radio" name="color-format" id="color3">
@@ -151,13 +181,28 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-4">
-                            Humidity Alert Limit
+                            Minimum Humidity Alert Limit
                         </div>
                         <div class="col-1">
                             <span class="bold">85%</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="100" value="85" class="slider" id="humidity">
+                            <input class="settings-block__slider" type="range" min="0" max="100" value="85" class="slider" id="humidityMin">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-block__field">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-4">
+                            Maximum Humidity Alert Limit
+                        </div>
+                        <div class="col-1">
+                            <span class="bold">85%</span>
+                        </div>
+                        <div class="col-6 d-flex align-items-center">
+                            <input class="settings-block__slider" type="range" min="0" max="100" value="85" class="slider" id="humidityMax">
                         </div>
                     </div>
                 </div>
@@ -203,6 +248,21 @@
                         </div>
                         <div class="col-6 d-flex align-items-center">
                             <input class="settings-block__slider" type="range" min="0" max="1" value="0" class="slider" id="gas">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-block__field">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-4">
+                            Temperature and Humidity Detection
+                        </div>
+                        <div class="col-1">
+                            <span class="bold">ON</span>
+                        </div>
+                        <div class="col-6 d-flex align-items-center">
+                            <input class="settings-block__slider" type="range" min="0" max="1" value="1" class="slider" id="dht">
                         </div>
                     </div>
                 </div>

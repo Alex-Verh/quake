@@ -19,7 +19,13 @@
         <div class="history-parameter">
             <div class="row  d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/temperature-b.svg')}}" alt="Temperature">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/temperature-y.svg')}}" alt="Temperature">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/temperature.svg')}}" alt="Temperature">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Temperature History</div>
@@ -35,7 +41,13 @@
         <div class="history-parameter">
             <div class="row  d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/humidity-b.svg')}}" alt="Humidity">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/humidity-y.svg')}}" alt="Humidity">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/humidity.svg')}}" alt="Humidity">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Humidity History</div>
@@ -67,7 +79,13 @@
         <div class="history-parameter">
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/fire-b.svg')}}" alt="Fire">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/fire-y.svg')}}" alt="Fire">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/fire.svg')}}" alt="Fire">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Flame Leaks</div>
@@ -124,7 +142,13 @@
         <div class="history-parameter">
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-b.svg')}}" alt="Earthquake">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-y.svg')}}" alt="Earthquake">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Earthquake Cases</div>
@@ -181,7 +205,13 @@
         <div class="history-parameter">
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke-b.svg')}}" alt="Smoke">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke-y.svg')}}" alt="Smoke">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke.svg')}}" alt="Smoke">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Smoke Leaks</div>
@@ -238,7 +268,13 @@
         <div class="history-parameter">
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/gas-b.svg')}}" alt="Gas">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/gas-y.svg')}}" alt="Gas">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/gas.svg')}}" alt="Gas">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Gas Leaks</div>

@@ -1,4 +1,7 @@
+import {fetchTheme} from "./general.js";
+
 document.addEventListener("DOMContentLoaded",  () => {
+
 	var socket = io();
     socket.on('connect', () => {
         console.log("connected")
@@ -30,6 +33,8 @@ document.addEventListener("DOMContentLoaded",  () => {
 		document.querySelector("#time").innerHTML = sensors["time"].split(' ')[1];
 		document.querySelector("#date").innerHTML = sensors["time"].split(' ')[0];
 	});
+
+	fetchTheme();
 });
 
 function bool_to_msg(bool, name) {

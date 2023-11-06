@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, redirect
-from flask_socketio import SocketIO
+# from flask_socketio import SocketIO
 import config
-import main_threads
+# import main_threads
 import random
 import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = random.randbytes(32)
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 
 @app.route("/")
 def main():
@@ -19,12 +19,18 @@ def settings():
 
 @app.route("/history")
 def history():
-    return render_template("history.html")
+    theme = 1
+    if ("color_format" in config.config):
+        theme = config.config["color_format"]
+    return render_template("history.html", theme=theme)
 
 
 @app.route("/live-state")
 def livestate():
-    return render_template("live-state.html")
+    theme = 1
+    if ("color_format" in config.config):
+        theme = config.config["color_format"]
+    return render_template("live-state.html", theme=theme)
 
 @app.route("/set_config", methods = ["POST"])
 def set_config():
@@ -78,7 +84,10 @@ def send_data_history():
 
 
 if __name__ == "__main__":
-    main_threads.main()
-    socketio.start_background_task(target=send_live_data)
-    socketio.start_background_task(target=send_data_history)
-    socketio.run(app)
+    app.run(debug=True)
+
+# if __name__ == "__main__":
+#     main_threads.main()
+#     socketio.start_background_task(target=send_live_data)
+#     socketio.start_background_task(target=send_data_history)
+#     socketio.run(app)
