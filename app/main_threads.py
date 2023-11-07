@@ -1,7 +1,6 @@
 # Import sensor modules
 from sensors import accel, dd_sensor, buzzer, led, dht
-#from sensors import dht
-
+import config
 import time
 import datetime
 import threading
@@ -27,21 +26,32 @@ LED_ITERATIONS = 3
 
 # Data constants
 DATA_QUEUE_SIZE = UPLOAD_SQL_INTERVAL / COLLECT_DATA_INTERVAL
-HUMIDITY_MIN = 30
-HUMIDITY_MAX = 70
-TEMPERATURE_MAX = 50
-SHARP_MOVEMENT_THRESHOLD = 15000
+HUMIDITY_MIN = "humidity_min"
+HUMIDITY_MAX = "humidity_max"
+TEMPERATURE_MAX = "temperature_max"
+SHARP_MOVEMENT_THRESHOLD = "sharp_movement_threshold"
+# HUMIDITY_MIN = 30                     #config[HUMIDITY_MIN]
+# HUMIDITY_MAX = 70                     #config[HUMIDITY_MAX]
+# TEMPERATURE_MAX = 50                  #config[TEMPERATURE_MAX]
+# SHARP_MOVEMENT_THRESHOLD = 15000      #config[SHARP_MOVEMENT_THRESHOLD]
 
 # Sensor enable control
-enable_dht = True
-enable_accel = True
-enable_flame = True
-enable_mq2 = False
-enable_mq9 = False
+ENABLE_DHT = "enable_dht"
+ENABLE_ACCEL = "enable_accel"
+ENABLE_FLAME = "enable_flame"
+ENABLE_MQ2 = "enable_mq2"
+ENABLE_MQ9 = "enable_mq9"
+# enable_dht = True                     #config[ENABLE_DHT]
+# enable_accel = True                   #config[ENABLE_ACCEL]
+# enable_flame = True                   #config[ENABLE_FLAME]
+# enable_mq2 = False                    #config[ENABLE_MQ2]
+# enable_mq9 = False                    #config[ENABLE_MQ9]
 
 # Alarm enable control
-enable_buzzer = False
-enable_led = True
+ENABLE_BUZZER = "enable_buzzer"
+ENABLE_LED = "enable_led"
+# enable_buzzer = True                  #config[ENABLE_BUZZER]
+# enable_led = True                     #config[ENABLE_LED]
 
 # Create a lock object for synchronized access to sensor_data
 data_lock = threading.Lock()
@@ -75,19 +85,19 @@ def get_latest_sensor_data_entry():
         
         val = False
         i = len(sensor_data["acceleration"].queue) - 1
-        # print("flame: ", sensor_data["acceleration"])
-        # print("flame: ", sensor_data["acceleration"].queue)
-        # print("flame: ", sensor_data["acceleration"].queue[i])
         if (i > -1):
             delta_x, delta_y, delta_z = sensor_data["acceleration"].queue[i]
-            val = delta_x > SHARP_MOVEMENT_THRESHOLD or delta_y > SHARP_MOVEMENT_THRESHOLD or delta_z > SHARP_MOVEMENT_THRESHOLD
+
+            if (SHARP_MOVEMENT_THRESHOLD not in config.config):
+                config.config[SHARP_MOVEMENT_THRESHOLD] = 15000
+                config.save()
+
+            threshold = config.config[SHARP_MOVEMENT_THRESHOLD]
+            val = delta_x > threshold or delta_y > threshold or delta_z > threshold
         data["earthquake"] = val
 
         val = False
         i = len(sensor_data["flame"].queue) - 1
-        # print("flame: ", sensor_data["flame"])
-        # print("flame: ", sensor_data["flame"].queue)
-        # print("flame: ", sensor_data["flame"].queue[i])
         if (i > -1):
             val = sensor_data["flame"].queue[i] == 1
         data["flame"] = val
@@ -311,11 +321,19 @@ def trigger_alarm():
     buzzer_thread = None
     led_thread = None
 
-    if (enable_buzzer):
+    if (ENABLE_BUZZER not in config.config):
+        config.config[ENABLE_BUZZER] = True
+        config.save()
+
+    if (config.config[ENABLE_BUZZER]):
         buzzer_thread = threading.Thread(target=buzzer.loop_buzzer, name="buzzer_thread", args=(BUZZER_PIN, BUZZER_ITERATIONS))
         buzzer_thread.start()
 
-    if (enable_led):
+    if (ENABLE_LED not in config.config):
+        config.config[ENABLE_LED] = True
+        config.save()
+
+    if (config.config[ENABLE_LED]):
         led_thread = threading.Thread(target=led.loop_led, name="led_thread", args=(LED_RED, LED_GREEN, LED_BLUE, LED_ITERATIONS))
         led_thread.start()
     
@@ -330,12 +348,30 @@ def trigger_alarm():
 def read_dht_data(interval):
     # print("Reading dht data...")
     while True:
-        if enable_dht:
+        if (ENABLE_DHT not in config.config):
+            config.config[ENABLE_DHT] = True
+            config.save()
+
+        if config.config[ENABLE_DHT]:
             humidity, temperature = dht.read_humidity_temperature(DHT_PIN)
             if humidity is not None and temperature is not None:
                 # print("Humidity: ", humidity, " Temperature: ", temperature)
 
-                if (humidity < HUMIDITY_MIN or humidity > HUMIDITY_MAX or temperature > TEMPERATURE_MAX):
+                if (HUMIDITY_MIN not in config.config):
+                    config.config[HUMIDITY_MIN] = 30
+                    config.save()
+
+                if (HUMIDITY_MAX not in config.config):
+                    config.config[HUMIDITY_MAX] = 70
+                    config.save()
+
+                if (TEMPERATURE_MAX not in config.config):
+                    config.config[TEMPERATURE_MAX] = 50
+                    config.save()
+
+                if (humidity < config.config[HUMIDITY_MIN] or 
+                    humidity > config.config[HUMIDITY_MAX] or 
+                    temperature > config.config[TEMPERATURE_MAX]):
                     print("Dangerous levels of humidity or temperature.")
                     trigger_alarm()
 
@@ -355,7 +391,10 @@ def read_mpu6050_data(interval):
     prev_acc_z = 0
 
     while True:
-        if enable_accel:
+        if (ENABLE_ACCEL not in config.config):
+            config.config[ENABLE_ACCEL] = True
+
+        if config.config[ENABLE_ACCEL]:
             # Note that we don't define pins for the MPU6050 because it can work only with GPIO 2 (SDA) and GPIO 3 (SCL)
             acc_x, acc_y, acc_z = accel.read_raw_acceleration()
 
@@ -372,11 +411,17 @@ def read_mpu6050_data(interval):
             # print("delta_x: ", delta_x, " delta_y: ", delta_y, " delta_z: ", delta_z)
 
             # Check for sharp movement
+            sharp_threshold_passed = False
+            if (SHARP_MOVEMENT_THRESHOLD not in config.config):
+                config.config[SHARP_MOVEMENT_THRESHOLD] = 15000
+
+            threshold = config.config[SHARP_MOVEMENT_THRESHOLD]
             sharp_threshold_passed = (
-                delta_x > SHARP_MOVEMENT_THRESHOLD 
-                or delta_y > SHARP_MOVEMENT_THRESHOLD 
-                or delta_z > SHARP_MOVEMENT_THRESHOLD
+                delta_x > threshold 
+                or delta_y > threshold 
+                or delta_z > threshold
             )
+
             if sharp_threshold_passed:
                 print("Sharp movement detected.")
                 trigger_alarm()
@@ -394,7 +439,11 @@ def read_mpu6050_data(interval):
 def read_flame_data(interval):
     # print("Reading flame data...")
     while True:
-        if enable_flame:
+        if (ENABLE_FLAME not in config.config):
+            config.config[ENABLE_FLAME] = True
+            config.save()
+
+        if config.config[ENABLE_FLAME]:
             flame = dd_sensor.read_dd(FLAME_PIN)
             # print('Flame status (0 - good; 1 - bad): ', flame)
             if (flame == 1):
@@ -411,7 +460,11 @@ def read_flame_data(interval):
 def read_mq2_data(interval):
     # print("Reading mq2 data...")
     while True:
-        if enable_mq2:
+        if (ENABLE_MQ2 not in config.config):
+            config.config[ENABLE_MQ2] = False
+            config.save()
+
+        if config.config[ENABLE_MQ2]:
             mq2 = dd_sensor.read_dd(MQ2_PIN)
             # print('Gas status (0 - bad; 1 - good): ', mq2)
             if (mq2 == 0):
@@ -428,7 +481,10 @@ def read_mq2_data(interval):
 def read_mq9_data(interval):
     # print("Reading mq9 data...")
     while True:
-        if enable_mq9:
+        if (ENABLE_MQ9 not in config.config):
+            config.config[ENABLE_MQ9] = False
+
+        if config.config[ENABLE_MQ9]:
             mq9 = dd_sensor.read_dd(MQ9_PIN)
             # print('Gas status (0 - bad; 1 - good): ', mq2)
             with data_lock:
@@ -442,6 +498,7 @@ def read_mq9_data(interval):
 
 
 def main():
+    print("Starting up the threads")
     try:
         dht_thread = threading.Thread(target=read_dht_data, name="dht_thread", args=(COLLECT_DATA_INTERVAL,))
         acceleration_thread = threading.Thread(target=read_mpu6050_data, name="acceleration_thread", args=(COLLECT_DATA_INTERVAL,))
@@ -468,7 +525,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-    while True:
-        time.sleep(1)
-        # print(get_latest_sensor_data_entry())
-        print(read_data_sql())
+    # while True:
+    #     time.sleep(1)
+    #     # print(get_latest_sensor_data_entry())
+    #     # print(read_data_sql())
