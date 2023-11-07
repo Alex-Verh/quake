@@ -143,69 +143,6 @@
             <div class="row d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
                     {% if theme == '2' -%}
-                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-b.svg')}}" alt="Earthquake">
-                    {% elif theme == '3' -%}
-                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-y.svg')}}" alt="Earthquake">
-                    {% else -%}
-                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
-                    {% endif %}
-                </div>
-                <div class="col-10">
-                    <div class="history-parameter__title">Earthquake Cases</div>
-                </div>
-                <div class="col-1">
-                    <img class="history-parameter__image" src="{{url_for('static', filename='images/arrow.svg')}}" alt="Arrow">
-                </div>
-            </div>
-        </div>
-        <div class="history-analytics none">
-            <div class="history-analytics__event">
-                <div class="row d-flex align-items-center">
-                    <div class="col-6">
-                        <div class="history-analytics__time">
-                            24 February 2023 - 23:43
-                        </div>
-                    </div>
-                    <div class="col-6 d-flex justify-content-end">
-                        <div class="history-analytics__stat great">
-                            Great Earthquake - 7.3°
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="history-analytics__event">
-                <div class="row d-flex align-items-center">
-                    <div class="col-6">
-                        <div class="history-analytics__time">
-                            24 February 2023 - 23:43
-                        </div>
-                    </div>
-                    <div class="col-6 d-flex justify-content-end">
-                        <div class="history-analytics__stat moderate">
-                            Moderate Earthquake - 5.3°
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="history-analytics__event">
-                <div class="row d-flex align-items-center">
-                    <div class="col-6">
-                        <div class="history-analytics__time">
-                            24 February 2023 - 23:43
-                        </div>
-                    </div>
-                    <div class="col-6 d-flex justify-content-end">
-                        <div class="history-analytics__stat small">
-                            Small Earthquake - 3.3°
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="history-parameter">
-            <div class="row d-flex align-items-center">
-                <div class="col-1 d-flex justify-content-center">
-                    {% if theme == '2' -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke-b.svg')}}" alt="Smoke">
                     {% elif theme == '3' -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/smoke-y.svg')}}" alt="Smoke">
