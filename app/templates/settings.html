@@ -53,7 +53,7 @@
                             Sound Alarm
                         </div>
                         <div class="col-4 d-flex align-items-center">
-                            <input class="settings-block__input" type="text" name="agreement" id="agreement" value="Caution! Enabling sound alarm may hurt people sensible to loud audio effects." readonly>
+                            <input class="settings-block__input" type="text" name="sound-enabling" id="sound-enabling" value="Caution! Enabling sound alarm may hurt people sensible to loud audio effects." readonly>
                         </div>
                         <div class="col-2 d-flex align-items-center justify-content-center">
                             <div class="settings-block__button settings-block__button_active" id="enable-sound-button">Enabled</div>
@@ -68,7 +68,7 @@
                             Light Alarm
                         </div>
                         <div class="col-4 d-flex align-items-center">
-                            <input class="settings-block__input" type="text" name="agreement" id="agreement" value="Caution! Enabling light alarm may hurt people sensible to visual effects." readonly>
+                            <input class="settings-block__input" type="text" name="light-enabling" id="light-enabling" value="Caution! Enabling light alarm may hurt people sensible to visual effects." readonly>
                         </div>
                         <div class="col-2 d-flex align-items-center justify-content-center">
                             <div class="settings-block__button settings-block__button_active" id="enable-light-button">Enabled</div>
@@ -154,10 +154,10 @@
                             Temperature Alert Limit
                         </div>
                         <div class="col-1">
-                            <span class="bold">40.0°</span>
+                            <span class="bold">0.0°</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="100" value="40" class="slider" id="temperature">
+                            <input class="settings-block__slider" type="range" min="0" max="100" value="0" class="slider" id="temperature">
                         </div>
                     </div>
                 </div>
@@ -169,10 +169,10 @@
                             Earthquake Alert Limit
                         </div>
                         <div class="col-1">
-                            <span class="bold">3.0°</span>
+                            <span class="bold">0.0°</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="10" value="3" class="slider" id="earthquake">
+                            <input class="settings-block__slider" type="range" min="0" max="10" value="0" class="slider" id="earthquake">
                         </div>
                     </div>
                 </div>
@@ -184,10 +184,10 @@
                             Minimum Humidity Alert Limit
                         </div>
                         <div class="col-1">
-                            <span class="bold">85%</span>
+                            <span class="bold">0%</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="30" value="20" class="slider" id="humidityMin">
+                            <input class="settings-block__slider" type="range" min="0" max="30" value="0" class="slider" id="humidityMin">
                         </div>
                     </div>
                 </div>
@@ -199,10 +199,10 @@
                             Maximum Humidity Alert Limit
                         </div>
                         <div class="col-1">
-                            <span class="bold">85%</span>
+                            <span class="bold">0%</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="31" max="100" value="85" class="slider" id="humidityMax">
+                            <input class="settings-block__slider" type="range" min="31" max="100" value="0" class="slider" id="humidityMax">
                         </div>
                     </div>
                 </div>
@@ -229,10 +229,10 @@
                             Flame Alert Limit
                         </div>
                         <div class="col-1">
-                            <span class="bold">ON</span>
+                            <span class="bold">OFF</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="1" value="1" class="slider" id="flame">
+                            <input class="settings-block__slider" type="range" min="0" max="1" value="0" class="slider" id="flame">
                         </div>
                     </div>
                 </div>
@@ -259,10 +259,10 @@
                             Temperature and Humidity Detection
                         </div>
                         <div class="col-1">
-                            <span class="bold">ON</span>
+                            <span class="bold">OFF</span>
                         </div>
                         <div class="col-6 d-flex align-items-center">
-                            <input class="settings-block__slider" type="range" min="0" max="1" value="1" class="slider" id="dht">
+                            <input class="settings-block__slider" type="range" min="0" max="1" value="0" class="slider" id="dht">
                         </div>
                     </div>
                 </div>

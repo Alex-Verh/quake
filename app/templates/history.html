@@ -63,7 +63,13 @@
         <div class="history-parameter">
             <div class="row  d-flex align-items-center">
                 <div class="col-1 d-flex justify-content-center">
+                    {% if theme == '2' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-b.svg')}}" alt="Earthquake">
+                    {% elif theme == '3' -%}
+                    <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake-y.svg')}}" alt="Earthquake">
+                    {% else -%}
                     <img class="history-parameter__image" src="{{url_for('static', filename='images/earthquake.svg')}}" alt="Earthquake">
+                    {% endif %}
                 </div>
                 <div class="col-10">
                     <div class="history-parameter__title">Seismic Activity History</div>

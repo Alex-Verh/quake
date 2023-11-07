@@ -3,6 +3,7 @@ import {fetchTheme, updateTheme} from "./general.js";
 document.addEventListener("DOMContentLoaded",  () => {
 
     const editAddressBtn = document.querySelector("#edit-address-button");
+    const emailInput = editAddressBtn.parentElement.previousElementSibling.querySelector(".settings-block__input");
     const enableNotifyBtn = document.querySelector("#enable-notify-button");
     const enableSoundBtn = document.querySelector("#enable-sound-button");
     const enableLightBtn = document.querySelector("#enable-light-button");
@@ -39,7 +40,6 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     // Settings Edit Personal //
     editAddressBtn.addEventListener("click", () => {
-        const emailInput = editAddressBtn.parentElement.previousElementSibling.querySelector(".settings-block__input");
 
         if (!emailInput.readOnly) {
             if (validateEmail(emailInput.value).isValid) {
@@ -204,6 +204,92 @@ document.addEventListener("DOMContentLoaded",  () => {
             console.error('There was a problem updating the config:', error);
           });
     }      
+
+    // Fetch Settings //
+    let configs;
+
+    fetch('/get_all_config', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received data:', data);
+        configs = data;
+        updateAllSettings(configs);
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+
+    function updateSliders(settings) {
+        temperatureSlider.value = settings["temperature_max"];
+        earthquakeSlider.value = settings["sharp_movement_threshold"] / 5000;
+        humidityMinSlider.value = settings["humidity_min"];
+        humidityMaxSlider.value = settings["humidity_max"];
+        smokeSlider.value = Number(settings["enable_mq2"]);
+        flameSlider.value = Number(settings["enable_flame"]);
+        gasSlider.value = Number(settings["enable_mq9"]);
+        dhtSlider.value = Number(settings["enable_dht"]);
+        document.querySelectorAll(".settings-block__slider").forEach((element, index) => {
+            if (index < 2) {
+                element.parentElement.previousElementSibling.querySelector("span.bold").innerHTML = element.value + ".0°"; 
+            } else if (index < 4){
+                element.parentElement.previousElementSibling.querySelector("span.bold").innerHTML = element.value + "%"; 
+            } else if (element.value == 0) {
+                element.parentElement.previousElementSibling.querySelector("span.bold").innerHTML = "OFF"; 
+            } else {
+                element.parentElement.previousElementSibling.querySelector("span.bold").innerHTML = "ON"; 
+            }
+        });
+    }
+
+    function updatePersonalSettings(settings) {
+        emailInput.value = settings["email"];
+
+        if (settings["enable_led"]) {
+            enableLightBtn.classList.add("settings-block__button_active");
+            enableLightBtn.innerHTML = "enabled";
+        } else {
+            enableLightBtn.classList.remove("settings-block__button_active");
+            enableLightBtn.innerHTML = "disabled";
+        }
+
+        if (settings["enable_buzzer"]) {
+            enableSoundBtn.classList.add("settings-block__button_active");
+            enableSoundBtn.innerHTML = "enabled";
+        } else {
+            enableSoundBtn.classList.remove("settings-block__button_active");
+            enableSoundBtn.innerHTML = "disabled";
+        }
+
+        if (settings["notification"] == "on") {
+            enableNotifyBtn.classList.add("settings-block__button_active");
+            enableNotifyBtn.innerHTML = "enabled";
+        } else {
+            enableNotifyBtn.classList.remove("settings-block__button_active");
+            enableNotifyBtn.innerHTML = "disabled";
+        }
+    }
+
+    function updatePreferenceSettings(settings) {
+        document.querySelector(`#time${settings["time_format"]}`).checked = true;
+        document.querySelector(`#color${settings["color_format"]}`).checked = true;
+        document.querySelector(`#date${settings["date_format"]}`).checked = true;
+    }
+
+    function updateAllSettings(settings) {
+        updateSliders(settings);
+        updatePersonalSettings(settings);
+        updatePreferenceSettings(settings);
+    }
     
     fetchTheme();
 });
