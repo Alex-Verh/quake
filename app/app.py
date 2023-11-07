@@ -1,14 +1,13 @@
 from flask import Flask, render_template, request, redirect
-# from flask_socketio import SocketIO
+from flask_socketio import SocketIO
 import config
-# import main_threads
+import main_threads
 import random
 import time
-from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = random.randbytes(32)
-# socketio = SocketIO(app)
+socketio = SocketIO(app)
 
 @app.route("/")
 def main():
@@ -56,22 +55,13 @@ def get_config():
 def get_all_config():
     return config.config
 
-# @socketio.on('connect')
-# def connect_event():
-#     print('Client connected')
+@socketio.on('connect')
+def connect_event():
+    print('Client connected')
 
 
 def send_live_data():
     while True:
-        time.sleep(1)  # Wait for 10 seconds
-        # socketio.emit('sensors', {
-        #     "temperature": 21.0,
-        #     "humidity": 32,
-        #     "flammable_gas": False,
-        #     "earthquake": False,
-        #     "smoke": False,
-        #     "time": time.strftime("%H:%M", time.gmtime())
-        # })
         data = main_threads.get_latest_sensor_data_entry()
         if (len(data) > 0):
             socketio.emit('sensors', {
@@ -83,20 +73,18 @@ def send_live_data():
                 "gas": data["gas"],
                 "time": data["time"]
             })
+        time.sleep(1)
 
 
 def send_data_history():
     while True:
         data = main_threads.read_data_sql()
         socketio.emit('history', data)
-        time.sleep(1)   # wait for 10 seconds
+        time.sleep(10)   # wait for 10 seconds
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
-# if __name__ == "__main__":
-#     main_threads.main()
-#     socketio.start_background_task(target=send_live_data)
-#     socketio.start_background_task(target=send_data_history)
-#     socketio.run(app)
+    main_threads.main()
+    socketio.start_background_task(target=send_live_data)
+    socketio.start_background_task(target=send_data_history)
+    socketio.run(app)
