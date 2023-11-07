@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, redirect
-# from flask_socketio import SocketIO
+from flask_socketio import SocketIO
 import config
-# import main_threads
+import main_threads
 import random
 import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = random.randbytes(32)
-# socketio = SocketIO(app)
+socketio = SocketIO(app)
 
 @app.route("/")
 def main():
@@ -84,10 +84,7 @@ def send_data_history():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
-# if __name__ == "__main__":
-#     main_threads.main()
-#     socketio.start_background_task(target=send_live_data)
-#     socketio.start_background_task(target=send_data_history)
-#     socketio.run(app)
+    main_threads.main()
+    socketio.start_background_task(target=send_live_data)
+    socketio.start_background_task(target=send_data_history)
+    socketio.run(app)

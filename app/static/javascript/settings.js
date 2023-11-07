@@ -74,10 +74,10 @@ document.addEventListener("DOMContentLoaded",  () => {
         enableLightBtn.classList.toggle("settings-block__button_active");
         if (enableLightBtn.classList.contains("settings-block__button_active")) {
             enableLightBtn.innerHTML = "enabled"
-            updateConfig('enable_led', "true");
+            updateConfig('enable_led', true);
         } else {
             enableLightBtn.innerHTML = "disabled"
-            updateConfig('enable_led', "false");
+            updateConfig('enable_led', false);
         }
     })
 
@@ -85,10 +85,10 @@ document.addEventListener("DOMContentLoaded",  () => {
         enableSoundBtn.classList.toggle("settings-block__button_active");
         if (enableSoundBtn.classList.contains("settings-block__button_active")) {
             enableSoundBtn.innerHTML = "enabled"
-            updateConfig('enable_buzzer', "true");
+            updateConfig('enable_buzzer', true);
         } else {
             enableSoundBtn.innerHTML = "disabled"
-            updateConfig('enable_buzzer', "false");
+            updateConfig('enable_buzzer', false);
         }
     })
 
@@ -146,15 +146,15 @@ document.addEventListener("DOMContentLoaded",  () => {
     // Settings Edit System //
     temperatureSlider.addEventListener("input", () => {
         clearTimeout(timer);
-        timer = setTimeout(updateConfig("temperature_max", temperatureSlider.value), 5000);
+        timer = setTimeout(updateConfig("temperature_max", Number(temperatureSlider.value)), 5000);
     });
     humidityMinSlider.addEventListener("input", () => {
         clearTimeout(timer);
-        timer = setTimeout(updateConfig("humidity_min", humidityMinSlider.value), 5000);
+        timer = setTimeout(updateConfig("humidity_min", Number(humidityMinSlider.value)), 5000);
     });
     humidityMaxSlider.addEventListener("input", () => {
         clearTimeout(timer);
-        timer = setTimeout(updateConfig("humidity_max", humidityMaxSlider.value), 5000);
+        timer = setTimeout(updateConfig("humidity_max", Number(humidityMaxSlider.value)), 5000);
     });
     earthquakeSlider.addEventListener("input", () => {
         clearTimeout(timer);
